@@ -1,0 +1,52 @@
+name: Kenicompetitivo
+version: 1.0
+api-version: 1.16
+main: mp.kenimon.Kenicompetitivo
+author: kenimon
+softdepend: [WorldGuard, DecentHolograms, PlaceholderAPI, Vault]
+description: Plugin de sistema competitivo basado en trofeos, rachas de kills y panel de recompensas.
+
+commands:
+  camino:
+    description: Muestra el menú del camino de trofeos
+    usage: /<command>
+    aliases: [ct, trofeos]
+  kenicompetitivo:
+    description: Comando principal del plugin
+    usage: /<command> <reload|addstreak|addtrophies|setstreak>
+    aliases: [kc]
+  ranking:
+    description: Gestiona los rankings del servidor
+    usage: /<command> <top|crear|actualizar|eliminar|listar>
+    aliases: [ranks, leaderboard]
+  cosmeticos:
+    description: Muestra el menú de cosméticos desbloqueados
+    usage: /<command>
+    aliases: [cosm, efectos]
+  head:
+    description: Gestiona la cabeza del jugador con mayor racha
+    usage: /<command> <set|info|update>
+    aliases: [tophead]
+  region:
+    description: Gestiona las regiones excluidas para rachas y trofeos
+    usage: /region [list|add|remove|check|available]
+    permission: kenicompetitivo.admin.regions
+  tienda:
+    description: Abre la tienda diaria con ofertas especiales
+    usage: /<command> [actualizar|recargar|tiempo|help]
+    aliases: [shop, dailyshop, ts]
+    permission: kenicompetitivo.tienda
+  reward:
+    description: Administra recompensas del sistema
+    usage: /reward <subcomando> [argumentos]
+
+permissions:
+  kenicompetitivo.use:
+    description: Permite usar los comandos del plugin Kenicompetitivo.
+    default: op
+  kenicompetitivo.tienda:
+    description: Permite acceder a la tienda diaria.
+    default: true
+  kenicompetitivo.admin.tienda:
+    description: Permite administrar la tienda diaria.
+    default: op

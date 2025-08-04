@@ -1,0 +1,255 @@
+package mp.kenimon.listeners;
+
+import mp.kenimon.Kenicompetitivo;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Sound;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+
+import java.util.List;
+import java.util.UUID;
+
+public class KillListener implements Listener {
+
+    private final Kenicompetitivo plugin;
+
+    public KillListener(Kenicompetitivo plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player victim = event.getEntity();
+        Player killer = victim.getKiller();
+
+        // Si no hay killer o es el mismo jugador, reset de racha pero sin penalización
+        if (killer == null || killer.equals(victim)) {
+            resetStreak(victim, false);
+            return;
+        }
+
+        // Verificar si están en región excluida
+        if (plugin.getWorldGuardUtil() != null && plugin.getWorldGuardUtil().isWorldGuardEnabled()) {
+            if (plugin.getWorldGuardUtil().isInExcludedRegion(victim) ||
+                    plugin.getWorldGuardUtil().isInExcludedRegion(killer)) {
+                String message = plugin.getConfigManager().getFormattedMessage("excluded_regions.message");
+                killer.sendMessage(message);
+                return;
+            }
+        }
+
+        // Verificar si el killer es top player (para recompensa especial)
+        UUID topPlayerUUID = plugin.getTopStreakHeadManager().getCurrentTopPlayerUUID();
+        boolean isKillingTopPlayer = topPlayerUUID != null && topPlayerUUID.equals(victim.getUniqueId());
+
+        // Guardar racha antigua para posible recompensa al matar al top
+        int oldVictimStreak = plugin.getCacheManager().getCachedKillStreak(victim.getUniqueId());
+
+        // Resetear la racha de la víctima y aplicar penalización
+        resetStreak(victim, true);
+
+        // Procesar racha del asesino
+        int currentStreak = plugin.getCacheManager().getCachedKillStreak(killer.getUniqueId());
+        int newStreak = currentStreak + 1;
+
+        // Actualizar la racha en caché y base de datos
+        plugin.getCacheManager().setCachedKillStreak(killer.getUniqueId(), newStreak);
+        plugin.getDatabaseManager().updateKillStreak(killer.getUniqueId(), newStreak, success -> {
+            if (success) {
+                // Notificar al jugador sobre la racha
+                if (newStreak == 1) {
+                    String startMessage = plugin.getConfigManager().getFormattedMessage("killstreak.start");
+                    killer.sendMessage(startMessage);
+                } else {
+                    String updateMessage = plugin.getConfigManager().getFormattedMessage("killstreak.update");
+                    updateMessage = updateMessage.replace("{streak}", String.valueOf(newStreak));
+                    killer.sendMessage(updateMessage);
+                }
+
+                // Si alcanzó un milestone de racha (configurable)
+                int milestoneInterval = plugin.getConfigManager().getConfig().getInt("milestone_interval", 5);
+                if (milestoneInterval > 0 && newStreak % milestoneInterval == 0) {
+                    String milestoneMessage = plugin.getConfigManager().getFormattedMessage("killstreak.milestone");
+                    milestoneMessage = milestoneMessage
+                            .replace("{player}", killer.getName())
+                            .replace("{streak}", String.valueOf(newStreak));
+
+                    // Broadcast del milestone
+                    Bukkit.broadcastMessage(milestoneMessage);
+                }
+
+                // Otorgar trofeos por el asesinato
+                grantTrophies(killer, newStreak);
+
+                // Verificar desbloqueos de cosméticos
+                plugin.getCosmeticManager().checkStreakUnlocks(killer, newStreak);
+
+                // Reproducir efectos de sonido si tiene alguno seleccionado
+                plugin.getCosmeticManager().playSoundEffectForPlayer(killer);
+
+                // Actualizar lista de jugadores top streak si es necesario
+                plugin.getTopStreakHeadManager().checkStreakUpdate(killer.getUniqueId(), newStreak);
+            }
+        });
+
+        // Si la víctima era el jugador con mejor racha, dar recompensa
+        if (isKillingTopPlayer && oldVictimStreak > 0) {
+            plugin.getTopStreakHeadManager().processTopPlayerKill(victim, killer, oldVictimStreak);
+        }
+
+        // NUEVO: Procesar recompensas por rachas
+        processStreakRewards(killer, newStreak);
+    }
+
+    /**
+     * Procesa las recompensas por rachas de kills
+     * @param player El jugador a quien dar las recompensas
+     * @param streak La racha actual del jugador
+     */
+    private void processStreakRewards(Player player, int streak) {
+        ConfigurationSection rewardsSection = plugin.getConfigManager().getConfig().getConfigurationSection("streak_rewards.ranges");
+        if (rewardsSection == null || !plugin.getConfigManager().getConfig().getBoolean("streak_rewards.enabled", true)) {
+            return;
+        }
+
+        for (String rangeKey : rewardsSection.getKeys(false)) {
+            String[] rangeParts = rangeKey.split("-");
+            if (rangeParts.length != 2) continue;
+
+            try {
+                int minStreak = Integer.parseInt(rangeParts[0]);
+                int maxStreak = Integer.parseInt(rangeParts[1]);
+
+                // Verificar si la racha está en el rango
+                if (streak >= minStreak && streak <= maxStreak) {
+                    // Verificar si esta racha exacta ya fue recompensada
+                    String rewardId = "streak_" + streak;
+                    if (!plugin.getRewardManager().hasClaimedReward(player.getUniqueId(), rewardId)) {
+                        // Ejecutar comandos de recompensa
+                        List<String> commands = rewardsSection.getStringList(rangeKey);
+                        for (String cmd : commands) {
+                            String processedCmd = cmd.replace("{player}", player.getName());
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCmd);
+                        }
+
+                        // Marcar como reclamada
+                        plugin.getRewardManager().claimReward(player.getUniqueId(), rewardId);
+
+                        // Mostrar mensaje de recompensa
+                        String message = plugin.getConfigManager().getFormattedMessage(
+                                "streak_rewards.received",
+                                "&a¡Has recibido una recompensa por alcanzar una racha de &6{streak}&a kills!");
+                        message = message.replace("{streak}", String.valueOf(streak));
+                        player.sendMessage(message);
+
+                        // Efecto de sonido
+                        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
+                    }
+                    break; // Una vez procesado un rango, salimos
+                }
+            } catch (NumberFormatException e) {
+                plugin.getLogger().warning("Formato de rango incorrecto en streak_rewards: " + rangeKey);
+            }
+        }
+    }
+
+    /**
+     * Resetea la racha de kills de un jugador
+     * @param player El jugador
+     * @param withPenalty Si debe aplicarse penalización de trofeos
+     */
+    private void resetStreak(Player player, boolean withPenalty) {
+        int oldStreak = plugin.getCacheManager().getCachedKillStreak(player.getUniqueId());
+
+        // Si el jugador no tenía racha, no hacer nada
+        if (oldStreak <= 0) return;
+
+        // Actualizar la racha a 0
+        plugin.getCacheManager().setCachedKillStreak(player.getUniqueId(), 0);
+        plugin.getDatabaseManager().updateKillStreak(player.getUniqueId(), 0, success -> {
+            if (success) {
+                // Aplicar penalización si corresponde
+                if (withPenalty) {
+                    applyStreakLossPenalty(player);
+                }
+
+                // Notificar pérdida de racha
+                String lostMessage = plugin.getConfigManager().getFormattedMessage("killstreak.lost");
+                player.sendMessage(lostMessage);
+            }
+        });
+    }
+
+    /**
+     * Aplica penalización por perder racha de kills
+     * @param player El jugador
+     */
+    private void applyStreakLossPenalty(Player player) {
+        int penalty = plugin.getConfigManager().getConfig().getInt("streak_loss_penalty", 50);
+        String currency = plugin.getConfigManager().getConfig().getString("currency_name", "trofeos");
+
+        // Si no hay penalización configurada, no hacer nada
+        if (penalty <= 0) return;
+
+        // Obtener trofeos actuales
+        int currentTrophies = plugin.getCacheManager().getCachedTrophies(player.getUniqueId());
+
+        // No aplicar penalización si no tiene suficientes trofeos
+        if (currentTrophies < penalty) {
+            penalty = currentTrophies;
+        }
+
+        // Si no hay trofeos para quitar, no hacer nada
+        if (penalty <= 0) return;
+
+        // Aplicar la penalización
+        int newTrophies = currentTrophies - penalty;
+        plugin.getCacheManager().setCachedTrophies(player.getUniqueId(), newTrophies);
+        plugin.getDatabaseManager().setTrophies(player.getUniqueId(), newTrophies);
+
+        // Notificar al jugador
+        String message = plugin.getConfigManager().getFormattedMessage("killstreak.max");
+        message = message.replace("%penalty%", String.valueOf(penalty))
+                .replace("%currency%", currency);
+        player.sendMessage(message);
+    }
+
+    /**
+     * Otorga trofeos por un asesinato
+     * @param player El jugador
+     * @param streak La racha actual del jugador
+     */
+    private void grantTrophies(Player player, int streak) {
+        // Trofeos base por kill
+        int baseTrophies = plugin.getConfigManager().getConfig().getInt("base_trophies", 10);
+
+        // Bonus por racha
+        int bonus = 0;
+        int maxBonus = plugin.getConfigManager().getConfig().getInt("max_trophy_bonus", 5);
+
+        // Si hay bonus específico para esta racha en la config, usarlo
+        String streakStr = String.valueOf(streak);
+        if (plugin.getConfigManager().getConfig().contains("trophy_increase_per_kill." + streakStr)) {
+            bonus = plugin.getConfigManager().getConfig().getInt("trophy_increase_per_kill." + streakStr);
+        } else {
+            // Si no, calcular proporcional al nivel de racha, con límite
+            bonus = Math.min(streak - 1, maxBonus);
+        }
+
+        // Total de trofeos a otorgar
+        int totalTrophies = baseTrophies + bonus;
+
+        // Actualizar trofeos en caché y BD
+        int currentTrophies = plugin.getCacheManager().getCachedTrophies(player.getUniqueId());
+        int newTrophies = currentTrophies + totalTrophies;
+
+        plugin.getCacheManager().setCachedTrophies(player.getUniqueId(), newTrophies);
+        plugin.getDatabaseManager().setTrophies(player.getUniqueId(), newTrophies);
+    }
+}

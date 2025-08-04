@@ -1,0 +1,145 @@
+# Mensajes del plugin Kenicompetitivo
+# Última actualización: 2025-05-11
+
+# Prefijo del plugin
+prefix: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&5&lR&x&F&F&E&9&1&7&lO&x&F&F&E&A&1&A&lF&x&F&F&E&A&1&D&lE&x&F&F&E&A&1&F&lO&x&F&F&E&A&2&2&lS &7» "
+
+# Mensajes de rachas de asesinatos
+killstreak:
+  start: "&a¡Tu racha ha sido activada! usa /cosmeticos"
+  update: "{prefix}&e¡Racha actual: {streak}!"
+  milestone: "{player} ha alcanzado una racha de {streak}!"
+  lost: "¡Has perdido tu racha!"
+  max: "&c¡Has perdido tu racha! Se te han descontado %penalty% %currency%."
+  no_rachas: "&cNo hay rachas disponibles."
+
+# Mensajes de recompensas
+reward:
+  claimed: "&x&F&F&A&3&1&2&lR&x&F&F&A&0&1&2&lE&x&F&F&9&E&1&2&lC&x&F&F&9&B&1&2&lO&x&F&F&9&8&1&2&lM&x&F&F&9&6&1&2&lP&x&F&F&9&3&1&2&lE&x&F&F&9&1&1&2&lN&x&F&F&8&E&1&2&lS&x&F&F&8&B&1&2&lA&x&F&F&8&9&1&2&lS &7» &a¡Has reclamado tu recompensa de {threshold} trofeos!"
+  need_more: "&x&F&F&A&3&1&2&lR&x&F&F&A&0&1&2&lE&x&F&F&9&E&1&2&lC&x&F&F&9&B&1&2&lO&x&F&F&9&8&1&2&lM&x&F&F&9&6&1&2&lP&x&F&F&9&3&1&2&lE&x&F&F&9&1&1&2&lN&x&F&F&8&E&1&2&lS&x&F&F&8&B&1&2&lA&x&F&F&8&9&1&2&lS &7» &cNecesitas {remaining} trofeos más para reclamar esta recompensa."
+  already_claimed: "&x&F&F&A&3&1&2&lR&x&F&F&A&0&1&2&lE&x&F&F&9&E&1&2&lC&x&F&F&9&B&1&2&lO&x&F&F&9&8&1&2&lM&x&F&F&9&6&1&2&lP&x&F&F&9&3&1&2&lE&x&F&F&9&1&1&2&lN&x&F&F&8&E&1&2&lS&x&F&F&8&B&1&2&lA&x&F&F&8&9&1&2&lS &7» &cYa has reclamado esta recompensa."
+  unavailable: "&cEsta recompensa no está disponible actualmente."
+
+# Mensajes de cabeza de display
+head_display:
+  updated: "&6¡{player} ahora tiene la racha más alta con {streak} kills consecutivas!"
+  location_set: "&aUbicación para la cabeza del mejor jugador establecida."
+  not_configured: "&cLa ubicación de la cabeza no está configurada."
+  info: "&6Ubicación actual de la cabeza: &eX: {x}, Y: {y}, Z: {z} en {world}"
+  updated_manually: "&aCabeza del mejor jugador actualizada manualmente."
+  reward: "&x&F&1&7&E&0&0&lR&x&F&4&8&0&0&4&lA&x&F&7&8&1&0&7&lC&x&F&9&8&3&0&B&lH&x&F&C&8&4&0&E&lA &7» &a¡Has matado a {player} que tenía la racha más alta ({streak} kills)! Recompensa: &6${value}"
+  killed: "&x&F&1&7&E&0&0&lR&x&F&4&8&0&0&4&lA&x&F&7&8&1&0&7&lC&x&F&9&8&3&0&B&lH&x&F&C&8&4&0&E&lA &7» &e¡{killer} ha eliminado a &c{victim} &ey ha reclamado una recompensa de &a{value}$ &epor su cabeza!"
+  new_record: "&b¡{player} ha establecido un nuevo récord de racha con {streak} kills!"
+  auto_update: "&7La lista de jugadores con mejor racha ha sido actualizada."
+
+# Mensajes de cosméticos
+cosmetics:
+  unlocked: "&x&7&E&F&F&1&2&lC&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lS&x&7&E&F&F&1&2&lM&x&7&E&F&F&1&2&lE&x&7&E&F&F&1&2&lT&x&7&E&F&F&1&2&lI&x&7&E&F&F&1&2&lC&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lS &7» &a¡Has desbloqueado el cosmético: &e{name}&a!"
+  selected: "&x&7&E&F&F&1&2&lC&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lS&x&7&E&F&F&1&2&lM&x&7&E&F&F&1&2&lE&x&7&E&F&F&1&2&lT&x&7&E&F&F&1&2&lI&x&7&E&F&F&1&2&lC&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lS &7» &aHas seleccionado el cosmético: &e{name}&a!"
+  deselected: "&x&7&E&F&F&1&2&lC&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lS&x&7&E&F&F&1&2&lM&x&7&E&F&F&1&2&lE&x&7&E&F&F&1&2&lT&x&7&E&F&F&1&2&lI&x&7&E&F&F&1&2&lC&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lS &7» &aHas desactivado los efectos de {category}"
+  not_unlocked: "&x&7&E&F&F&1&2&lC&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lS&x&7&E&F&F&1&2&lM&x&7&E&F&F&1&2&lE&x&7&E&F&F&1&2&lT&x&7&E&F&F&1&2&lI&x&7&E&F&F&1&2&lC&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lS &7» &cNo has desbloqueado este cosmético."
+  already_unlocked: "&x&7&E&F&F&1&2&lC&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lS&x&7&E&F&F&1&2&lM&x&7&E&F&F&1&2&lE&x&7&E&F&F&1&2&lT&x&7&E&F&F&1&2&lI&x&7&E&F&F&1&2&lC&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lS &7» &cYa tienes este cosmético desbloqueado."
+  menu:
+    title: "&b&lCosméticos"
+    category_particles: "&bPartículas"
+    category_sounds: "&bSonidos"
+    category_kills: "&bEfectos de Kill"
+    back: "&cVolver"
+    none: "&cNinguno"
+    locked: "&cBloqueado"
+    unlocked: "&aDesbloqueado"
+    selected: "&a✓ Seleccionado"
+    unlock_requirement: "&7Requiere racha de &6{streak}"
+    click_to_select: "&7Haz clic para seleccionar"
+
+# Mensajes de rankings
+rankings:
+  created: "&aRanking creado correctamente."
+  removed: "&aRanking eliminado correctamente."
+  updated: "&aRankings actualizados correctamente."
+  not_found: "&cNo se encontró el ranking especificado."
+  hologram_created: "&aHolograma de ranking creado correctamente."
+  hologram_removed: "&aHolograma de ranking eliminado correctamente."
+  hologram_not_found: "&cNo se encontraron hologramas cercanos."
+  sign_created: "&aLetrero de ranking registrado correctamente."
+  sign_removed: "&aLetrero de ranking eliminado correctamente."
+  sign_not_found: "&cEl bloque seleccionado no es un letrero de ranking registrado."
+  no_holograms: "&cNo hay hologramas configurados."
+  hologram_list_header: "&6=== Hologramas de Ranking ==="
+
+# Mensajes de comandos
+commands:
+  no_permission: "&cNo tienes permiso para usar este comando."
+  player_only: "&cEste comando solo puede ser usado por jugadores."
+  player_not_found: "&cJugador no encontrado."
+  reload_success: "&aConfiguración recargada correctamente."
+  invalid_number: "&cLa cantidad debe ser un número válido."
+  trophies_added: "&aTrofeos de {player} actualizados de {old} a {new}"
+  trophies_received: "&aHas recibido {amount} trofeos."
+  streak_added: "&aRacha de kills de {player} aumentada en {amount}"
+  streak_set: "&aRacha de kills de {player} establecida en {amount}"
+  streak_received: "&aTu racha de kills ha {action} en {amount}"
+  cosmetic_given: "&aHas dado el cosmético &6{id}&a a &6{player}"
+  cosmetic_not_found: "&cEfecto no encontrado."
+  gems_added: "&aGemas de {player} actualizadas de {old} a {new}"
+  gems_received: "&aHas recibido {amount} gemas."
+
+# Mensajes del camino de trofeos
+trophies_path:
+  title: "&6Camino de Trofeos"
+  page: "&e{current}/{total}"
+  next_page: "&aSiguiente Página"
+  previous_page: "&aAnterior Página"
+  reward_title: "&6Recompensa: {threshold} Trofeos"
+  reward_lore: "&7Haz clic para reclamar"
+  already_claimed_lore: "&cYa reclamado"
+  not_enough_lore: "&cNecesitas {remaining} más"
+  total_trophies: "&eTrofeos totales: &6{amount}"
+  total_streak: "&6{streak} 123"
+
+# Mensajes de errores
+errors:
+  database_error: "&cError en la base de datos. Contacte a un administrador."
+  unknown_error: "&cHa ocurrido un error desconocido."
+  invalid_command: "&cComando no reconocido."
+  invalid_arguments: "&cArgumentos inválidos."
+  cosmetic_error: "&cError al aplicar el cosmético."
+  hologram_plugin_missing: "&cNo se encontró ningún plugin de hologramas compatible."
+
+holograms:
+  updated_successfully: "&x&7&E&F&F&1&2&lH&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lL&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lG&x&7&E&F&F&1&2&lR&x&7&E&F&F&1&2&lA&x&7&E&F&F&1&2&lM&x&7&E&F&F&1&2&lA&x&7&E&F&F&1&2&lS &7» &a¡Todos los hologramas han sido actualizados correctamente!"
+  head_updated: "&x&7&E&F&F&1&2&lH&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lL&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lG&x&7&E&F&F&1&2&lR&x&7&E&F&F&1&2&lA&x&7&E&F&F&1&2&lM&x&7&E&F&F&1&2&lA&x&7&E&F&F&1&2&lS &7» &aHolograma de la cabeza actualizado."
+  rankings_updated: "&x&7&E&F&F&1&2&lH&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lL&x&7&E&F&F&1&2&lO&x&7&E&F&F&1&2&lG&x&7&E&F&F&1&2&lR&x&7&E&F&F&1&2&lA&x&7&E&F&F&1&2&lM&x&7&E&F&F&1&2&lA&x&7&E&F&F&1&2&lS &7» &aHologramas de rankings actualizados."
+  auto_update: "&7Actualización automática de hologramas completada."
+  no_holograms_plugin: "&cNo se detectó ningún plugin de hologramas compatible. Instala DecentHolograms."
+
+shop:
+  title: "&6Tienda Diaria"
+  open: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&3&lI&x&F&F&E&9&1&4&lE&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&5&lD&x&F&F&E&9&1&6&lA &7» &aAbriendo la tienda diaria..."
+  update: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&3&lI&x&F&F&E&9&1&4&lE&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&5&lD&x&F&F&E&9&1&6&lA &7» &a¡La tienda diaria ha sido actualizada con nuevos artículos!"
+  reload: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&3&lI&x&F&F&E&9&1&4&lE&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&5&lD&x&F&F&E&9&1&6&lA &7» &aConfiguración de la tienda recargada."
+  purchase_success: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&3&lI&x&F&F&E&9&1&4&lE&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&5&lD&x&F&F&E&9&1&6&lA &7» &a¡Compra realizada con éxito!"
+  free_claimed: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&3&lI&x&F&F&E&9&1&4&lE&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&5&lD&x&F&F&E&9&1&6&lA &7» &a¡Has reclamado tu artículo gratuito!"
+  already_purchased: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&3&lI&x&F&F&E&9&1&4&lE&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&5&lD&x&F&F&E&9&1&6&lA &7» &cYa has adquirido este artículo."
+  not_enough_trophies: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&3&lI&x&F&F&E&9&1&4&lE&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&5&lD&x&F&F&E&9&1&6&lA &7» &cNo tienes suficientes trofeos para comprar este artículo."
+  not_enough_money: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&3&lI&x&F&F&E&9&1&4&lE&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&5&lD&x&F&F&E&9&1&6&lA &7» &cNo tienes suficiente dinero para comprar este artículo."
+  next_update: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&3&lI&x&F&F&E&9&1&4&lE&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&5&lD&x&F&F&E&9&1&6&lA &7» &6Próxima actualización: &e{time}"
+  broadcast: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&3&lI&x&F&F&E&9&1&4&lE&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&5&lD&x&F&F&E&9&1&6&lA &7» &a¡La tienda diaria ha sido actualizada! Usa &e/tienda &apara ver las nuevas ofertas."
+  error: "&x&F&F&E&9&1&2&lT&x&F&F&E&9&1&3&lI&x&F&F&E&9&1&4&lE&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&5&lD&x&F&F&E&9&1&6&lA &7» &cError al procesar la compra. Por favor, inténtalo más tarde."
+  not_enough_gems: "{prefix}&cNo tienes suficientes gemas para comprar este artículo."
+  cooldown_reset: "{prefix}&aEl tiempo de espera para volver a comprar ha sido reiniciado."
+  all_cooldowns_reset: "{prefix}&aTodos tus tiempos de espera han sido reiniciados."
+  admin:
+    item_saved: "{prefix}&aEl ítem ha sido guardado como &e{id}&a en la tienda."
+    no_item_in_hand: "{prefix}&cNo tienes ningún ítem en la mano."
+    item_save_error: "{prefix}&cError al guardar el ítem. Revisa la consola para más detalles."
+    reload: "{prefix}&aConfiguración de la tienda recargada correctamente."
+    update: "{prefix}&aTienda actualizada manualmente."
+    item_added: "{prefix}&aÍtem añadido a la tienda."
+    item_removed: "{prefix}&aÍtem eliminado de la tienda."
+    cooldown_reset: "{prefix}&aTiempo de espera reiniciado para {player}."
+    all_cooldowns_reset: "{prefix}&aTodos los tiempos de espera reiniciados para {player}."
+
+streak_rewards:
+  received: "{prefix}&a¡Has recibido una recompensa por alcanzar una racha de &6{streak}&a kills!"
+  level_up: "{prefix}&b¡Has alcanzado un nuevo nivel de recompensas por racha!"

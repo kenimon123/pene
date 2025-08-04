@@ -1,0 +1,343 @@
+# Configuración de la tienda diaria
+settings:
+  title: '&a€ Tienda | Menú'
+  rows: 6
+  update_time: 00:00 # Hora de actualización (formato 24h)
+  max_items_per_day: 8 # Máximo de items por día
+  item_appearance_chance: 100 # Probabilidad (%) de que aparezca un item
+  always_free_item: true # Siempre debe haber un item gratis
+  broadcast_update: true # Anunciar cuando se actualiza la tienda
+  save_purchases: true # Guardar historial de compras
+  purchase_cooldown: 24 # Horas de espera para volver a comprar un mismo artículo
+
+# Configuración de economías
+economies:
+  trophies:
+    enabled: true
+    placeholder: '%kenicompetitivo_caminodetrofeos%'
+    format: 'trofeos &x&F&F&E&A&2&1&l🏆'
+  gems:
+    enabled: true
+    placeholder: '%kenicompetitivo_gems%'
+    format: '{value} gemas'
+  money:
+    enabled: true
+    vault: true
+    format: ${value}
+
+# Configuración de la decoración
+decoration:
+  enabled: true
+  item: LIGHT_GRAY_STAINED_GLASS_PANE
+  name: ' '
+  positions:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 17
+    - 18
+    - 26
+    - 27
+    - 35
+    - 36
+    - 44
+    - 45
+    - 46
+    - 47
+    - 48
+    - 50
+    - 51
+    - 52
+    - 53
+
+# Botón para cerrar la tienda
+close_button:
+  enabled: true
+  position: 49
+  item: BARRIER
+  name: '&x&F&F&2&2&2&2&lCER&x&F&F&2&6&2&6&lRAR'
+  lore:
+
+# Formato para items gratuitos
+free_item_format:
+  name: '&x&6&5&F&F&2&2&lITE&x&6&5&F&F&2&2&lM D&x&6&C&F&F&2&C&lIAR&x&7&3&F&F&3&6&lIO &x&7&3&F&F&3&6&lGRA&x&7&3&F&F&3&6&lTIS'
+  lore:
+    - '&7{item_description}'
+    - ''
+    - '&x&6&5&F&F&2&2► ¡Haga click para reclamar el regalo gratis!'
+  glow: true
+
+# Formato para items de pago
+paid_item_format:
+  name: '&f{item_name}'
+  lore:
+    - '&7{item_description}'
+    - ''
+    - ' &8┃ &7Rareza: {rarity_display}'
+    - ' &8┃ &fCosto&7: &e{price} $'
+    - ''
+    - '&e► ¡Haga click para comprar telarañas!'
+  glow: false
+
+# Formato para items ya comprados
+purchased_item_format:
+  name: '&x&F&F&2&2&2&2&lITE&x&F&F&2&2&2&2&lM C&x&F&F&2&2&2&2&lOMP&x&F&F&2&2&2&2&lRAD&x&F&F&2&2&2&2&lO'
+  item: GRAY_DYE # Item a mostrar cuando ya está comprado
+  lore:
+    - '&7{item_description}'
+    - ''
+    - '&x&F&F&2&2&2&2Ya has comprado este artículo.'
+    - ''
+    - '&x&F&F&2&2&2&2► ¡&x&F&F&2&2&2&2Disponible nuevamente en 24 horas!'
+  glow: false
+
+claimed_free_item_format:
+  name: '&x&F&F&2&2&2&2&lITE&x&F&F&2&2&2&2&lM D&x&F&F&2&2&2&2&lIAR&x&F&F&2&2&2&2&lIO &x&F&F&2&2&2&2&lREC&x&F&F&2&2&2&2&lLAM&x&F&F&2&2&2&2&lADO'
+  item: BARRIER
+  lore:
+    - '&7{item_description}'
+    - ''
+    - '&x&F&F&2&2&2&2► ¡&x&F&F&2&2&2&2Disponible nuevamente en 24 horas!'
+  glow: false
+
+# Configuración de rareza
+rarity:
+  common:
+    name: '&7Común'
+    chance_multiplier: 1.0
+    color: '&7'
+  uncommon:
+    name: '&aIncomún'
+    chance_multiplier: 0.7
+    color: '&a'
+  rare:
+    name: '&9Raro'
+    chance_multiplier: 0.4
+    color: '&9'
+  epic:
+    name: '&5Épico'
+    chance_multiplier: 0.2
+    color: '&5'
+  legendary:
+    name: '&6Legendario'
+    chance_multiplier: 0.1
+    color: '&6'
+  mythic:
+    name: '&d&lMítico'
+    chance_multiplier: 0.05
+    color: '&d&l'
+
+# Items permanentes (siempre en la tienda)
+permanent_items:
+  - cosmetic_flame
+  - cosmetic_wings
+  - booster_token
+  - llave_kit
+  - antielytras
+  - notch
+
+# Items disponibles en la tienda
+items:
+  # EFECTOS COSMÉTICOS
+  cosmetic_flame:
+    type: cosmetic
+    cosmetic_id: particle_flame
+    item: BLAZE_POWDER
+    name: Efecto de Llamas
+    description: Partículas de llamas te rodearán
+    price: 750
+    currency: trophies
+    rarity: epic
+    can_be_free: false
+    has_cooldown: true
+    permanent: true
+
+  cosmetic_wings:
+    type: cosmetic
+    cosmetic_id: particle_wings
+    item: ELYTRA
+    name: Alas de Partículas
+    description: Muestra unas elegantes alas de partículas
+    price: 1500
+    currency: gems
+    rarity: legendary
+    can_be_free: false
+    has_cooldown: true
+    permanent: true
+
+  cosmetic_thunder:
+    type: cosmetic
+    cosmetic_id: kill_thunder
+    item: TRIDENT
+    name: Muerte Tormentosa
+    description: Invoca rayos al eliminar enemigos
+    price: 2000
+    currency: gems
+    rarity: mythic
+    can_be_free: false
+    has_cooldown: true
+
+  # CABEZAS PERSONALIZADAS
+  special_crown:
+    type: item
+    item: PLAYER_HEAD
+    texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWMxZGU5NTcxY2FjOWZkNGMyODRjOWY5ZjdkZDkwY2VmMTRhYjQ4ZjJjMDJkNzEyOTQyMDdjOGFmY2EzOGM1MSJ9fX0=
+    name: Corona Real
+    description: Una magnífica corona para la realeza
+    price: 5000
+    currency: trophies
+    rarity: mythic
+    can_be_free: false
+    has_cooldown: true
+    commands:
+      - give {player} player_head{SkullOwner:{Id:[I;1201296705,-1073342150,-1311457301,677611]}}
+
+  # KITS NORMALES
+  survival_kit:
+    type: item
+    item: STONE_PICKAXE
+    name: Kit de Supervivencia
+    description: Un kit básico para sobrevivir
+    price: 100
+    currency: trophies
+    rarity: common
+    can_be_free: true
+    commands:
+      - give {player} stone_sword 1
+      - give {player} stone_pickaxe 1
+      - give {player} cooked_beef 16
+
+  miner_kit:
+    type: item
+    item: IRON_PICKAXE
+    name: Kit de Minero
+    description: Herramientas para minar eficientemente
+    price: 200
+    currency: trophies
+    rarity: uncommon
+    can_be_free: true
+    commands:
+      - give {player} iron_pickaxe 1
+      - give {player} iron_shovel 1
+      - give {player} torch 32
+
+  # BOOSTER DE TROFEOS (ARTÍCULO PREMIUM)
+  booster_token:
+    type: item
+    item: EXPERIENCE_BOTTLE
+    name: Potenciador de Trofeos
+    description: Multiplica por 2 los trofeos ganados durante 1 hora
+    price: 500
+    currency: money
+    rarity: epic
+    can_be_free: false
+    has_cooldown: true
+    permanent: true
+    commands:
+      - keniboosters give {player} trophies 2.0 60
+
+  # ITEM RARO CON BAJA PROBABILIDAD
+  ultimate_sword:
+    type: item
+    item: DIAMOND_SWORD
+    name: Espada Definitiva
+    description: Una espada legendaria con encantamientos únicos
+    price: 3000
+    currency: gems
+    rarity: mythic
+    can_be_free: false
+    has_cooldown: true
+    commands:
+      - give {player} diamond_sword{Enchantments:[{id:"minecraft:sharpness",lvl:7s},{id:"minecraft:fire_aspect",lvl:3s}]}
+
+  hola:
+    type: item
+    item: TRIPWIRE_HOOK
+    price: 5000
+    currency: money
+    rarity: uncommon
+    can_be_free: false
+    has_cooldown: true
+    name: §x§F§F§A§3§1§5§l§kasd §fʟʟᴀᴠᴇ §7- §x§F§F§A§3§1§5§lʜ§x§F§F§A§E§1§2§lᴇ§x§F§F§B§8§0§E§lʀ§x§F§F§C§3§0§B§lᴏ§x§F§F§C§E§0§7§lɪ§x§F§F§D§8§0§4§lᴄ§x§F§F§E§3§0§0§lᴀ
+      §x§F§F§E§3§0§0§l§kasd
+    description: §8ʟʟᴀᴠᴇ
+    commands:
+      - phoenixcrates giveKey heroica {player} 10
+  kit:
+    type: item
+    item: WHITE_SHULKER_BOX
+    price: 10000
+    currency: money
+    rarity: rare
+    can_be_free: false
+    has_cooldown: true
+    permanent: false
+    name: §fKit §8▶ §x§F§F§F§F§F§F§lP§x§E§7§D§D§E§C§lU§x§D§0§B§A§D§A§lP§x§B§8§9§8§C§7§lP§x§A§1§7§5§B§5§lE§x§8§9§5§3§A§2§lT
+    description: Ítem especial de la tienda
+    commands:
+      - kit give vip {player}
+  llave_kit:
+    type: item
+    item: TRIPWIRE_HOOK
+    price: 1000
+    currency: trophies
+    rarity: uncommon
+    can_be_free: false
+    has_cooldown: false
+    permanent: true
+    name: §fLlave §7- §x§C§6§2§F§F§F§lK§x§C§6§2§F§F§F§lI§x§C§6§2§F§F§F§lT
+    description:
+      - §8descripcion
+      - ''
+      - §fEsta llave lo podras conseguir durante las keyall
+      - §fy en la tienda para mas informacion en /tienda
+      - ''
+      - §fRareza » §e⭐⭐⭐⭐⭐⭐⭐
+    full_lore:
+    commands:
+      - phoenixcrates giveKey kit {player} 1
+  antielytras:
+    type: item
+    item: FEATHER
+    price: 5
+    currency: gems
+    rarity: common
+    can_be_free: false
+    has_cooldown: false
+    permanent: true
+    name: §x§F§F§5§A§5§A§lA§x§F§F§4§F§4§F§lN§x§F§F§4§3§4§3§lT§x§F§F§3§8§3§8§lI§x§F§F§2§D§2§D§l-§x§F§F§2§2§2§2§lE§x§F§F§1§6§1§6§lL§x§F§F§0§B§0§B§lY§x§F§F§0§0§0§0§lT§x§F§F§0§0§0§0§lR§x§F§F§0§0§0§0§lA
+    description:
+      - §7Golpea a un jugador para desactivar
+      - §7su elytra temporalmente
+      - ''
+      - '§7Duración: §a30 segundos'
+      - '§7Cooldown: §c60 segundos'
+    full_lore:
+    commands:
+      - keniitems give {player} anti_elytra
+  notch:
+    type: item
+    item: ENCHANTED_GOLDEN_APPLE
+    price: 5000
+    currency: money
+    rarity: common
+    can_be_free: false
+    has_cooldown: false
+    permanent: true
+    name: '&x&E&8&F&A&2&CM&x&E&8&F&A&2&Ca&x&E&8&F&A&2&Cn&x&E&8&F&A&2&Cz&x&E&8&F&A&2&Ca&x&E&8&F&A&2&Cn&x&E&8&F&A&2&Ca&x&E&8&F&A&2&C &x&E&8&F&A&2&Cd&x&E&8&F&A&2&Co&x&E&8&F&A&2&Cr&x&E&8&F&A&2&Ca&x&E&8&F&A&2&Cd&x&E&8&F&A&2&Ca 🍎'
+    description:
+      - §7Golpea a un jugador para desactivar
+      - §7su elytra temporalmente
+      - ''
+      - '§7Duración: §a30 segundos'
+      - '§7Cooldown: §c60 segundos'
+    full_lore:
+    commands:
+      - give {player} enchanted_golden_apple 1
