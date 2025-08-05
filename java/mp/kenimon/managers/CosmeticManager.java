@@ -851,10 +851,16 @@ public class CosmeticManager {
     }
 
     /**
-     * Verifica si un jugador tiene desbloqueado un efecto
+     * Verifica si un jugador tiene desbloqueado un efecto con manejo mejorado de timeouts
      */
     public boolean hasUnlockedEffect(UUID uuid, String effectId) {
-        return plugin.getDatabaseManager().hasUnlockedCosmetic(uuid, effectId);
+        try {
+            return plugin.getDatabaseManager().hasUnlockedCosmetic(uuid, effectId);
+        } catch (Exception e) {
+            // En caso de timeout o error de base de datos, loggear y retornar false
+            plugin.getLogger().warning("Error verificando efecto desbloqueado para " + uuid + ": " + e.getMessage());
+            return false;
+        }
     }
 
     /**
@@ -927,9 +933,19 @@ public class CosmeticManager {
 
     /**
      * Verifica y desbloquea cosméticos basados en la racha de kills
-     * VERSIÓN CORREGIDA
+     * VERSIÓN ASÍNCRONA para evitar bloqueos del thread principal
      */
     public void checkStreakUnlocks(Player player, int streak) {
+        // Ejecutar de forma asíncrona para no bloquear el thread principal
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            checkStreakUnlocksSync(player, streak);
+        });
+    }
+    
+    /**
+     * Método interno síncrono para verificar desbloqueos
+     */
+    private void checkStreakUnlocksSync(Player player, int streak) {
         FileConfiguration config = plugin.getConfigManager().getConfig();
         ConfigurationSection streaksSection = config.getConfigurationSection("cosmetics.unlocks.streaks");
 
@@ -937,8 +953,6 @@ public class CosmeticManager {
             plugin.getLogger().warning("No se encontró la sección cosmetics.unlocks.streaks en la configuración");
             return;
         }
-
-        // DEBUG: Imprimir información de racha
 
         for (String streakKey : streaksSection.getKeys(false)) {
             try {
@@ -949,7 +963,8 @@ public class CosmeticManager {
                     List<String> effects = config.getStringList("cosmetics.unlocks.streaks." + streakKey + ".effects");
 
                     for (String effectId : effects) {
-                        if (!hasUnlockedEffect(player.getUniqueId(), effectId) && effectExists(effectId)) {
+                        // Usar verificación que maneja timeouts correctamente
+                        if (!hasUnlockedEffectSafe(player.getUniqueId(), effectId) && effectExists(effectId)) {
                             unlockEffect(player.getUniqueId(), effectId);
                         }
                     }
@@ -958,6 +973,21 @@ public class CosmeticManager {
                 plugin.getLogger().warning("Valor de racha inválido en la configuración: " + streakKey);
             }
         }
+    }
+    
+    /**
+     * Verifica si un jugador tiene desbloqueado un efecto de forma segura
+     * Maneja timeouts sin bloquear el thread principal
+     */
+    private boolean hasUnlockedEffectSafe(UUID uuid, String effectId) {
+        try {
+            return plugin.getDatabaseManager().hasUnlockedCosmetic(uuid, effectId);
+        } catch (Exception e) {
+            // En caso de error o timeout, asumir que no está desbloqueado
+            plugin.getLogger().warning("Error verificando efecto desbloqueado (usando false por defecto): " + e.getMessage());
+            return false;
+        }
+    }
     }
 
     /**
