@@ -222,16 +222,50 @@ public class TopStreakHeadManager {
         if (block.getState() instanceof Skull) {
             Skull skull = (Skull) block.getState();
 
-            // Intentar obtener el jugador online o offline
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(currentTopPlayer);
-            skull.setOwningPlayer(offlinePlayer);
+            try {
+                // Intentar obtener el jugador online o offline
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(currentTopPlayer);
+                
+                // Usar el método correcto de la API para evitar warnings de reflexión
+                if (offlinePlayer.hasPlayedBefore() || offlinePlayer.isOnline()) {
+                    skull.setOwningPlayer(offlinePlayer);
+                } else {
+                    // Si el jugador nunca ha jugado, buscar por nombre si está disponible
+                    String playerName = offlinePlayer.getName();
+                    if (playerName != null && !playerName.isEmpty()) {
+                        // Usar método deprecado pero más seguro para jugadores que nunca se conectaron
+                        skull.setOwner(playerName);
+                    } else {
+                        plugin.getLogger().warning("No se puede establecer dueño de skull: jugador no encontrado");
+                        return;
+                    }
+                }
 
-            // Forzar actualización completa
-            skull.update(true, false);
+                // Actualizar el estado del bloque de forma segura
+                boolean updated = skull.update(true, false);
+                if (!updated) {
+                    plugin.getLogger().warning("No se pudo actualizar el estado de la skull");
+                }
 
-            // Crear/actualizar holograma
-            String playerName = offlinePlayer.getName() != null ? offlinePlayer.getName() : "Desconocido";
-            updateHologram(playerName, currentTopStreak);
+                // Crear/actualizar holograma
+                String playerName = offlinePlayer.getName() != null ? offlinePlayer.getName() : "Desconocido";
+                updateHologram(playerName, currentTopStreak);
+                
+            } catch (Exception e) {
+                plugin.getLogger().warning("Error al establecer dueño de skull: " + e.getMessage());
+                // Intentar método alternativo como fallback
+                try {
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(currentTopPlayer);
+                    String playerName = offlinePlayer.getName();
+                    if (playerName != null) {
+                        skull.setOwner(playerName);
+                        skull.update(true, false);
+                        updateHologram(playerName, currentTopStreak);
+                    }
+                } catch (Exception fallbackEx) {
+                    plugin.getLogger().severe("Error crítico al establecer skull: " + fallbackEx.getMessage());
+                }
+            }
         } else {
             plugin.getLogger().warning("El bloque en la ubicación configurada no es una calavera");
         }
@@ -331,34 +365,68 @@ public class TopStreakHeadManager {
         if (block.getState() instanceof Skull) {
             Skull skull = (Skull) block.getState();
 
-            // Intentar obtener el jugador online o offline
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
-            skull.setOwningPlayer(offlinePlayer);
+            try {
+                // Intentar obtener el jugador online o offline
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
+                
+                // Usar el método correcto de la API para evitar warnings de reflexión
+                if (offlinePlayer.hasPlayedBefore() || offlinePlayer.isOnline()) {
+                    skull.setOwningPlayer(offlinePlayer);
+                } else {
+                    // Si el jugador nunca ha jugado, buscar por nombre si está disponible
+                    String playerName = offlinePlayer.getName();
+                    if (playerName != null && !playerName.isEmpty()) {
+                        // Usar método deprecado pero más seguro para jugadores que nunca se conectaron
+                        skull.setOwner(playerName);
+                    } else {
+                        plugin.getLogger().warning("No se puede establecer dueño de skull: jugador no encontrado");
+                        return;
+                    }
+                }
 
-            // Forzar actualización completa
-            skull.update(true, false);
+                // Actualizar el estado del bloque de forma segura
+                boolean updated = skull.update(true, false);
+                if (!updated) {
+                    plugin.getLogger().warning("No se pudo actualizar el estado de la skull");
+                }
 
-            // Verificación de depuración para la skin
-            plugin.getLogger().info("Cabeza actualizada para jugador: " +
-                    (offlinePlayer.getName() != null ? offlinePlayer.getName() : playerUUID));
+                // Verificación de depuración para la skin
+                plugin.getLogger().info("Cabeza actualizada para jugador: " +
+                        (offlinePlayer.getName() != null ? offlinePlayer.getName() : playerUUID));
 
-            // Anunciar la nueva cabeza en el servidor, solo si cambió de jugador
-            String playerName = offlinePlayer.getName();
-            if (playerName != null) {
-                String message = plugin.getConfigManager().getFormattedMessage(
-                        "head_display.updated",
-                        "&6¡{player} ahora tiene la racha más alta con {streak} kills consecutivas!");
+                // Anunciar la nueva cabeza en el servidor, solo si cambió de jugador
+                String playerName = offlinePlayer.getName();
+                if (playerName != null) {
+                    String message = plugin.getConfigManager().getFormattedMessage(
+                            "head_display.updated",
+                            "&6¡{player} ahora tiene la racha más alta con {streak} kills consecutivas!");
 
-                message = message.replace("{player}", playerName)
-                        .replace("{streak}", String.valueOf(streak));
+                    message = message.replace("{player}", playerName)
+                            .replace("{streak}", String.valueOf(streak));
 
-                Bukkit.broadcastMessage(message);
+                    Bukkit.broadcastMessage(message);
+                }
+
+                // Crear/actualizar holograma
+                plugin.getLogger().info("Llamando a updateHologram con: " +
+                        (playerName != null ? playerName : "Desconocido") + ", " + streak);
+                updateHologram(playerName != null ? playerName : "Desconocido", streak);
+                
+            } catch (Exception e) {
+                plugin.getLogger().warning("Error al establecer dueño de skull: " + e.getMessage());
+                // Intentar método alternativo como fallback
+                try {
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
+                    String playerName = offlinePlayer.getName();
+                    if (playerName != null) {
+                        skull.setOwner(playerName);
+                        skull.update(true, false);
+                        updateHologram(playerName, streak);
+                    }
+                } catch (Exception fallbackEx) {
+                    plugin.getLogger().severe("Error crítico al establecer skull: " + fallbackEx.getMessage());
+                }
             }
-
-            // Crear/actualizar holograma
-            plugin.getLogger().info("Llamando a updateHologram con: " +
-                    (playerName != null ? playerName : "Desconocido") + ", " + streak);
-            updateHologram(playerName != null ? playerName : "Desconocido", streak);
         } else {
             plugin.getLogger().warning("El bloque en la ubicación configurada no es una calavera");
         }

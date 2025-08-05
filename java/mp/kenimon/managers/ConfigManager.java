@@ -17,6 +17,10 @@ public class ConfigManager {
     private File configFile;
     private File messagesFile;
     private String prefix;
+    
+    // Cache for shop configuration to avoid multiple loads
+    private FileConfiguration shopConfig;
+    private long shopConfigLastModified = 0;
 
     public ConfigManager(Kenicompetitivo plugin) {
         this.plugin = plugin;
@@ -136,7 +140,7 @@ public class ConfigManager {
     }
 
     /**
-     * Método específico para cargar el archivo tienda.yml
+     * Método específico para cargar el archivo tienda.yml con cache
      */
     public FileConfiguration loadShopConfig() {
         File shopFile = new File(plugin.getDataFolder(), "tienda.yml");
@@ -147,7 +151,7 @@ public class ConfigManager {
                 plugin.saveResource("tienda.yml", false);
                 plugin.getLogger().info("Archivo tienda.yml creado correctamente.");
             } catch (Exception e) {
-                plugin.getLogger().severe("No se pudo crear tienda.yml desde el jar: " + e.getMessage());
+                plugin.getLogger().warning("No se pudo crear tienda.yml desde el jar: " + e.getMessage());
                 // Crear un archivo vacío si no se puede extraer del jar
                 try {
                     shopFile.createNewFile();
@@ -158,9 +162,16 @@ public class ConfigManager {
             }
         }
 
-        // Cargar el archivo
-        YamlConfiguration shopConfig = YamlConfiguration.loadConfiguration(shopFile);
-        plugin.getLogger().info("tienda.yml cargado con " + shopConfig.getKeys(false).size() + " secciones principales.");
+        // Verificar si necesitamos recargar el archivo (cache)
+        long currentModified = shopFile.lastModified();
+        if (shopConfig == null || currentModified != shopConfigLastModified) {
+            // Cargar el archivo solo si es necesario
+            shopConfig = YamlConfiguration.loadConfiguration(shopFile);
+            shopConfigLastModified = currentModified;
+            plugin.getLogger().info("tienda.yml cargado con " + shopConfig.getKeys(false).size() + " secciones principales.");
+        } else {
+            plugin.getLogger().fine("tienda.yml ya está cargado, usando cache.");
+        }
 
         return shopConfig;
     }
