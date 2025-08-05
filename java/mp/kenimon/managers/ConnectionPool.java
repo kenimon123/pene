@@ -24,8 +24,8 @@ public class ConnectionPool {
     private volatile boolean shutdown = false;
     
     // Configuración optimizada para SQLite
-    private static final int DEFAULT_POOL_SIZE = 1; // SQLite funciona mejor con una sola conexión
-    private static final int CONNECTION_TIMEOUT = 10; // segundos
+    private static final int DEFAULT_POOL_SIZE = 3; // Aumentado para mejor concurrencia
+    private static final int CONNECTION_TIMEOUT = 5; // Reducido a 5 segundos para evitar bloqueos largos
     
     public ConnectionPool(Kenicompetitivo plugin, String connectionUrl) {
         this(plugin, connectionUrl, DEFAULT_POOL_SIZE);
@@ -87,7 +87,7 @@ public class ConnectionPool {
                     stmt.execute("PRAGMA synchronous = NORMAL");  // Balance entre seguridad y rendimiento
                     stmt.execute("PRAGMA cache_size = 10000");    // Cache de 10MB aproximadamente
                     stmt.execute("PRAGMA temp_store = MEMORY");   // Tablas temporales en memoria
-                    stmt.execute("PRAGMA busy_timeout = 30000");  // Timeout de 30 segundos
+                    stmt.execute("PRAGMA busy_timeout = 5000");   // Timeout de 5 segundos (coordinado con pool timeout)
                     stmt.execute("PRAGMA journal_mode = WAL");    // Modo WAL para mejor concurrencia
                 } catch (SQLException pragmaEx) {
                     plugin.getLogger().warning("Error configurando PRAGMAs SQLite: " + pragmaEx.getMessage());

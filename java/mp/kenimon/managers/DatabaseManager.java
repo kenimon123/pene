@@ -132,11 +132,8 @@ public class DatabaseManager {
      * Configura las tablas necesarias en la base de datos
      */
     public void setupDatabase() {
-        Connection conn = null;
-        Statement stmt = null;
-        try {
-            conn = getConnection();
-            stmt = conn.createStatement();
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
             
             // Configurar WAL mode una sola vez durante la inicialización
             stmt.execute("PRAGMA journal_mode = WAL");
@@ -176,16 +173,10 @@ public class DatabaseManager {
                     ");";
             stmt.execute(sql);
 
-            stmt.close();
             plugin.getLogger().info("Base de datos inicializada con índices optimizados");
 
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Error configurando la base de datos", e);
-        } finally {
-            if (stmt != null) {
-                try { stmt.close(); } catch (SQLException ignored) {}
-            }
-            returnConnection(conn);
         }
     }
 
@@ -266,21 +257,17 @@ public class DatabaseManager {
      */
     public CompletableFuture<Boolean> playerExistsAsync(UUID uuid) {
         return CompletableFuture.supplyAsync(() -> {
-            Connection conn = null;
-            try {
-                conn = getConnection();
-                PreparedStatement ps = conn.prepareStatement("SELECT 1 FROM players WHERE uuid = ? LIMIT 1");
+            try (Connection conn = getConnection();
+                 PreparedStatement ps = conn.prepareStatement("SELECT 1 FROM players WHERE uuid = ? LIMIT 1")) {
+                
                 ps.setString(1, uuid.toString());
                 ResultSet rs = ps.executeQuery();
                 boolean exists = rs.next();
                 rs.close();
-                ps.close();
                 return exists;
             } catch (SQLException e) {
                 plugin.getLogger().warning("Error al verificar jugador: " + e.getMessage());
                 return false;
-            } finally {
-                returnConnection(conn);
             }
         }, databaseExecutor);
     }
@@ -289,21 +276,17 @@ public class DatabaseManager {
      * Verifica si un jugador existe en la base de datos (SÍNCRONO - solo para compatibilidad)
      */
     public boolean playerExists(UUID uuid) {
-        Connection conn = null;
-        try {
-            conn = getConnection();
-            PreparedStatement ps = conn.prepareStatement("SELECT 1 FROM players WHERE uuid = ? LIMIT 1");
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT 1 FROM players WHERE uuid = ? LIMIT 1")) {
+            
             ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();
             boolean exists = rs.next();
             rs.close();
-            ps.close();
             return exists;
         } catch (SQLException e) {
             plugin.getLogger().warning("Error al verificar jugador: " + e.getMessage());
             return false;
-        } finally {
-            returnConnection(conn);
         }
     }
 
@@ -312,22 +295,15 @@ public class DatabaseManager {
      */
     public CompletableFuture<Void> registerPlayerAsync(UUID uuid) {
         return CompletableFuture.runAsync(() -> {
-            Connection conn = null;
-            try {
-                conn = getConnection();
+            try (Connection conn = getConnection();
+                 PreparedStatement ps = conn.prepareStatement(
+                     "INSERT OR IGNORE INTO players (uuid, trophies, kill_streak, max_kill_streak) VALUES (?, 0, 0, 0)")) {
                 
-                // Usar INSERT OR IGNORE para evitar errores si ya existe
-                PreparedStatement ps = conn.prepareStatement(
-                    "INSERT OR IGNORE INTO players (uuid, trophies, kill_streak, max_kill_streak) VALUES (?, 0, 0, 0)"
-                );
                 ps.setString(1, uuid.toString());
                 ps.executeUpdate();
-                ps.close();
                 
             } catch (SQLException e) {
                 plugin.getLogger().warning("Error al registrar jugador: " + e.getMessage());
-            } finally {
-                returnConnection(conn);
             }
         }, databaseExecutor);
     }
@@ -336,22 +312,15 @@ public class DatabaseManager {
      * Registra un nuevo jugador (SÍNCRONO - para compatibilidad)
      */
     public void registerPlayer(UUID uuid) {
-        Connection conn = null;
-        try {
-            conn = getConnection();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                 "INSERT OR IGNORE INTO players (uuid, trophies, kill_streak, max_kill_streak) VALUES (?, 0, 0, 0)")) {
             
-            // Usar INSERT OR IGNORE para evitar errores si ya existe
-            PreparedStatement ps = conn.prepareStatement(
-                "INSERT OR IGNORE INTO players (uuid, trophies, kill_streak, max_kill_streak) VALUES (?, 0, 0, 0)"
-            );
             ps.setString(1, uuid.toString());
             ps.executeUpdate();
-            ps.close();
             
         } catch (SQLException e) {
             plugin.getLogger().warning("Error al registrar jugador: " + e.getMessage());
-        } finally {
-            returnConnection(conn);
         }
     }
 
@@ -360,27 +329,20 @@ public class DatabaseManager {
      */
     public CompletableFuture<Void> setTrophiesAsync(UUID uuid, int amount) {
         return CompletableFuture.runAsync(() -> {
-            Connection conn = null;
-            try {
-                conn = getConnection();
+            try (Connection conn = getConnection();
+                 PreparedStatement ps = conn.prepareStatement(
+                     "INSERT OR REPLACE INTO players (uuid, trophies, kill_streak, max_kill_streak) " +
+                     "VALUES (?, ?, COALESCE((SELECT kill_streak FROM players WHERE uuid = ?), 0), " +
+                     "COALESCE((SELECT max_kill_streak FROM players WHERE uuid = ?), 0))")) {
                 
-                // Usar UPSERT para insert o update en una sola operación
-                PreparedStatement ps = conn.prepareStatement(
-                    "INSERT OR REPLACE INTO players (uuid, trophies, kill_streak, max_kill_streak) " +
-                    "VALUES (?, ?, COALESCE((SELECT kill_streak FROM players WHERE uuid = ?), 0), " +
-                    "COALESCE((SELECT max_kill_streak FROM players WHERE uuid = ?), 0))"
-                );
                 ps.setString(1, uuid.toString());
                 ps.setInt(2, amount);
                 ps.setString(3, uuid.toString());
                 ps.setString(4, uuid.toString());
                 ps.executeUpdate();
-                ps.close();
                 
             } catch (SQLException e) {
                 plugin.getLogger().warning("Error al establecer trofeos: " + e.getMessage());
-            } finally {
-                returnConnection(conn);
             }
         }, databaseExecutor);
     }
@@ -389,27 +351,20 @@ public class DatabaseManager {
      * Establece la cantidad de trofeos para un jugador (SÍNCRONO - para compatibilidad)
      */
     public void setTrophies(UUID uuid, int amount) {
-        Connection conn = null;
-        try {
-            conn = getConnection();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                 "INSERT OR REPLACE INTO players (uuid, trophies, kill_streak, max_kill_streak) " +
+                 "VALUES (?, ?, COALESCE((SELECT kill_streak FROM players WHERE uuid = ?), 0), " +
+                 "COALESCE((SELECT max_kill_streak FROM players WHERE uuid = ?), 0))")) {
             
-            // Registrar jugador si no existe usando UPSERT
-            PreparedStatement ps = conn.prepareStatement(
-                "INSERT OR REPLACE INTO players (uuid, trophies, kill_streak, max_kill_streak) " +
-                "VALUES (?, ?, COALESCE((SELECT kill_streak FROM players WHERE uuid = ?), 0), " +
-                "COALESCE((SELECT max_kill_streak FROM players WHERE uuid = ?), 0))"
-            );
             ps.setString(1, uuid.toString());
             ps.setInt(2, amount);
             ps.setString(3, uuid.toString());
             ps.setString(4, uuid.toString());
             ps.executeUpdate();
-            ps.close();
 
         } catch (SQLException e) {
             plugin.getLogger().warning("Error al establecer trofeos: " + e.getMessage());
-        } finally {
-            returnConnection(conn);
         }
     }
 
@@ -480,76 +435,58 @@ public class DatabaseManager {
 
         // Procesar asíncronamente
         CompletableFuture.runAsync(() -> {
-            Connection conn = null;
-            try {
-                conn = getConnection();
+            try (Connection conn = getConnection()) {
                 conn.setAutoCommit(false);
 
-                // Preparar statement para UPSERT
-                PreparedStatement ps = conn.prepareStatement(
+                try (PreparedStatement ps = conn.prepareStatement(
                     "INSERT OR REPLACE INTO players (uuid, trophies, kill_streak, max_kill_streak) " +
                     "VALUES (?, " +
                     "COALESCE(?, COALESCE((SELECT trophies FROM players WHERE uuid = ?), 0)), " +
                     "COALESCE(?, COALESCE((SELECT kill_streak FROM players WHERE uuid = ?), 0)), " +
-                    "COALESCE(?, COALESCE((SELECT max_kill_streak FROM players WHERE uuid = ?), 0)))"
-                );
+                    "COALESCE(?, COALESCE((SELECT max_kill_streak FROM players WHERE uuid = ?), 0)))")) {
 
-                int batchCount = 0;
-                for (Map.Entry<UUID, BatchPlayerData> entry : toProcess.entrySet()) {
-                    UUID uuid = entry.getKey();
-                    BatchPlayerData data = entry.getValue();
+                    int batchCount = 0;
+                    for (Map.Entry<UUID, BatchPlayerData> entry : toProcess.entrySet()) {
+                        UUID uuid = entry.getKey();
+                        BatchPlayerData data = entry.getValue();
 
-                    ps.setString(1, uuid.toString());
-                    ps.setObject(2, data.trophies); // null si no hay update
-                    ps.setString(3, uuid.toString());
-                    ps.setObject(4, data.killStreak);
-                    ps.setString(5, uuid.toString());
-                    ps.setObject(6, data.maxKillStreak);
-                    ps.setString(7, uuid.toString());
+                        ps.setString(1, uuid.toString());
+                        ps.setObject(2, data.trophies); // null si no hay update
+                        ps.setString(3, uuid.toString());
+                        ps.setObject(4, data.killStreak);
+                        ps.setString(5, uuid.toString());
+                        ps.setObject(6, data.maxKillStreak);
+                        ps.setString(7, uuid.toString());
 
-                    ps.addBatch();
-                    batchCount++;
+                        ps.addBatch();
+                        batchCount++;
 
-                    // Procesar en lotes de 50 para evitar memory issues
-                    if (batchCount % 50 == 0) {
-                        ps.executeBatch();
-                        ps.clearBatch();
+                        // Procesar en lotes de 50 para evitar memory issues
+                        if (batchCount % 50 == 0) {
+                            ps.executeBatch();
+                            ps.clearBatch();
+                        }
                     }
-                }
 
-                // Procesar lote final
-                if (batchCount % 50 != 0) {
-                    ps.executeBatch();
-                }
+                    // Procesar lote final
+                    if (batchCount % 50 != 0) {
+                        ps.executeBatch();
+                    }
 
-                conn.commit();
-                ps.close();
+                    conn.commit();
 
-                // Registrar métricas de rendimiento
-                if (plugin.getPerformanceMonitor() != null) {
-                    plugin.getPerformanceMonitor().recordBatchOperation(toProcess.size());
-                }
+                    // Registrar métricas de rendimiento
+                    if (plugin.getPerformanceMonitor() != null) {
+                        plugin.getPerformanceMonitor().recordBatchOperation(toProcess.size());
+                    }
 
-                if (plugin.getConfig().getBoolean("database.debug", false)) {
-                    plugin.getLogger().info("Procesadas " + toProcess.size() + " actualizaciones batch");
+                    if (plugin.getConfig().getBoolean("database.debug", false)) {
+                        plugin.getLogger().info("Procesadas " + toProcess.size() + " actualizaciones batch");
+                    }
                 }
 
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.WARNING, "Error procesando batch updates", e);
-                try {
-                    if (conn != null) conn.rollback();
-                } catch (SQLException rollbackEx) {
-                    plugin.getLogger().log(Level.SEVERE, "Error en rollback", rollbackEx);
-                }
-            } finally {
-                try {
-                    if (conn != null) {
-                        conn.setAutoCommit(true);
-                        returnConnection(conn);
-                    }
-                } catch (SQLException e) {
-                    plugin.getLogger().log(Level.WARNING, "Error restaurando autocommit", e);
-                }
             }
         }, databaseExecutor);
     }
@@ -557,21 +494,18 @@ public class DatabaseManager {
      * Obtiene la cantidad de trofeos de un jugador (OPTIMIZADO)
      */
     public int getTrophies(UUID uuid) {
-        Connection conn = null;
-        try {
-            conn = getConnection();
-            PreparedStatement ps = conn.prepareStatement("SELECT trophies FROM players WHERE uuid = ? LIMIT 1");
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT trophies FROM players WHERE uuid = ? LIMIT 1")) {
+            
             ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
                 int trophies = rs.getInt("trophies");
                 rs.close();
-                ps.close();
                 return trophies;
             } else {
                 rs.close();
-                ps.close();
                 // Registrar jugador asíncronamente para futuros accesos
                 registerPlayerAsync(uuid);
                 return 0;
@@ -580,8 +514,6 @@ public class DatabaseManager {
         } catch (SQLException e) {
             plugin.getLogger().warning("Error al obtener trofeos: " + e.getMessage());
             return 0;
-        } finally {
-            returnConnection(conn);
         }
     }
 
@@ -590,30 +522,23 @@ public class DatabaseManager {
      * Usa UPSERT para evitar múltiples consultas
      */
     public void setKillStreak(UUID uuid, int streak) {
-        Connection conn = null;
-        try {
-            conn = getConnection();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                 "INSERT OR REPLACE INTO players (uuid, trophies, kill_streak, max_kill_streak) " +
+                 "VALUES (?, " +
+                 "COALESCE((SELECT trophies FROM players WHERE uuid = ?), 0), " +
+                 "?, " +
+                 "MAX(?, COALESCE((SELECT max_kill_streak FROM players WHERE uuid = ?), 0)))")) {
             
-            // Usar UPSERT con subconsulta para obtener max_kill_streak en una sola operación
-            PreparedStatement ps = conn.prepareStatement(
-                "INSERT OR REPLACE INTO players (uuid, trophies, kill_streak, max_kill_streak) " +
-                "VALUES (?, " +
-                "COALESCE((SELECT trophies FROM players WHERE uuid = ?), 0), " +
-                "?, " +
-                "MAX(?, COALESCE((SELECT max_kill_streak FROM players WHERE uuid = ?), 0)))"
-            );
             ps.setString(1, uuid.toString());
             ps.setString(2, uuid.toString());
             ps.setInt(3, streak);
             ps.setInt(4, streak);
             ps.setString(5, uuid.toString());
             ps.executeUpdate();
-            ps.close();
 
         } catch (SQLException e) {
             plugin.getLogger().warning("Error al establecer racha de kills: " + e.getMessage());
-        } finally {
-            returnConnection(conn);
         }
     }
 
@@ -621,21 +546,18 @@ public class DatabaseManager {
      * Obtiene la racha actual de kills de un jugador (OPTIMIZADO)
      */
     public int getKillStreak(UUID uuid) {
-        Connection conn = null;
-        try {
-            conn = getConnection();
-            PreparedStatement ps = conn.prepareStatement("SELECT kill_streak FROM players WHERE uuid = ? LIMIT 1");
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT kill_streak FROM players WHERE uuid = ? LIMIT 1")) {
+            
             ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
                 int streak = rs.getInt("kill_streak");
                 rs.close();
-                ps.close();
                 return streak;
             } else {
                 rs.close();
-                ps.close();
                 // Registrar jugador asíncronamente
                 registerPlayerAsync(uuid);
                 return 0;
@@ -644,8 +566,6 @@ public class DatabaseManager {
         } catch (SQLException e) {
             plugin.getLogger().warning("Error al obtener racha de kills: " + e.getMessage());
             return 0;
-        } finally {
-            returnConnection(conn);
         }
     }
 
