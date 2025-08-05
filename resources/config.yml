@@ -42,7 +42,6 @@ auto_updates:
 
 # Nombre de la moneda virtual (puedes cambiar "trofeos" por otro)
 currency_name: trofeos
-
 # Valor base y escalado de trofeos
 base_trophies: 10
 max_trophy_bonus: 5 # Máximo de incremento de racha (cuando racha>=5, se usará base+5)
@@ -57,7 +56,6 @@ streak_loss_penalty: 50
 
 # Máximo total de trofeos en el camino (por defecto 10k)
 max_total_trophies: 10000
-
 # Configuración del panel de trofeos
 panel:
   title: '&x&F&F&E&9&1&2&lC&x&F&F&E&9&1&3&lA&x&F&F&E&9&1&4&lM&x&F&F&E&9&1&5&lI&x&F&F&E&9&1&5&lN&x&F&F&E&9&1&6&lO
@@ -71,17 +69,17 @@ panel:
     item: PLAYER_HEAD
     name: '&e{player}'
     lore:
-      - '&7Informacion'
-      - ''
-      - '&f &7| &x&F&F&E&9&1&2Trofeos 🏆 &7» &e{trophies}'
-      - '&f &7| &x&F&F&6&0&1&2Racha actual 🔥 &7» &6{streak}'
-      - '&f &7| &7Racha maxima &7🔥 &7» &7{max_streak}'
-
+    - '&7Informacion'
+    - ''
+    - '&f &7| &x&F&F&E&9&1&2Trofeos 🏆 &7» &e{trophies}'
+    - '&f &7| &x&F&F&6&0&1&2Racha actual 🔥 &7» &6{streak}'
+    - '&f &7| &7Racha maxima &7🔥 &7» &7{max_streak}'
+  
   # Nuevo sistema de camino visual
   path:
     enabled: true
     # Trofeos por bloque del camino
-    trophies_per_block: 10
+    trophies_per_block: 5
     # Material para bloques no alcanzados
     not_reached_material: BLACK_STAINED_GLASS_PANE
     # Material para bloques alcanzados
@@ -90,340 +88,967 @@ panel:
     block_name: '&x&F&F&E&9&1&2{trophies} &x&F&F&E&9&1&2Trofeos 🏆'
     # Lore para bloques no alcanzados
     not_reached_lore:
-      - '&7Informacion'
-      - ''
-      - '&f &7| &7Estado &7» &c¡Bloqueado!'
-      - '&f &7| Necesitas &x&F&F&E&9&1&2{remaining} 🏆 &7trofeos más'
+    - '&7Informacion'
+    - ''
+    - '&f &7| &7Estado &7» &c¡Bloqueado!'
+    - '&f &7| Necesitas &x&F&F&E&9&1&2{remaining} 🏆 &7trofeos más'
     # Lore para bloques alcanzados
     reached_lore:
-      - '&7Informacion'
-      - ''
-      - '&f &7| &7Estado &7» &a¡Desbloqueado!'
+    - '&7Informacion'
+    - ''
+    - '&f &7| &7Estado &7» &a¡Desbloqueado!'
     # Patrón del camino (orden de slots)
     # Patrón del camino (orden de slots) - Patrón tipo "gusanito" mejorado
     # Patrón del camino (orden de slots) - Patrón tipo "gusanito" personalizado
     pattern:
-      - 10
-      - 19
-      - 28
-      - 37
-      - 38
-      - 39
-      - 30
-      - 21
-      - 12
-      - 13
-      - 14
-      - 23
-      - 32
-      - 41
-      - 42
-      - 43
-      - 34
-      - 25
-      - 16
-
+    - 10
+    - 19
+    - 28
+    - 37
+    - 38
+    - 39
+    - 30
+    - 21
+    - 12
+    - 13
+    - 14
+    - 23
+    - 32
+    - 41
+    - 42
+    - 43
+    - 34
+    - 25
+    - 16
+  
   # Botones de navegación
   close_button:
     material: BARRIER
     name: '&cCerrar'
     lore:
-      - ''
-      - '&fHaz clic para cerrar el menú'
-
+    - ''
+    - '&fHaz clic para cerrar el menú'
+  
   # Configuración de botón página anterior (mostrado desde la segunda página)
   prev_button:
     material: ARROW
     name: '&aPágina Anterior'
     lore:
-      - '&fHaz clic para volver a la pagina anterior'
-
+    - '&fHaz clic para volver a la pagina anterior'
+  
   # Configuración del botón siguiente página
   next_button:
     material: ARROW
     name: '&bSiguiente Página'
     lore:
-      - '&fHaz clic para ir a la siguiente pagina'
-
+    - '&fHaz clic para ir a la siguiente pagina'
+  
   # Configuración de los items de recompensas
   reward_item:
     available:
       name: '{reward_name} &f- &x&F&F&E&9&1&2{threshold} Trofeos 🏆'
       lore:
-        - '&7Recompensas'
-        - ''
-        - '&f &7» &f{reward_description}'
-        - ''
-        - '&f &7| &7Estado: &a¡Disponible!'
-        - ''
-        - '&7» &x&1&2&F&F&3&6Haz clic para reclamar'
+      - '&7Recompensas'
+      - ''
+      - '&f &7» &f{reward_description}'
+      - ''
+      - '&f &7| &7Estado: &a¡Disponible!'
+      - ''
+      - '&7» &x&1&2&F&F&3&6Haz clic para reclamar'
     claimed:
       name: '{reward_name} &f- &x&F&F&E&9&1&2{threshold} Trofeos 🏆'
       lore:
-        - '&7Recompensas'
-        - ''
-        - '&f &7» &f{reward_description}'
-        - ''
-        - '&f &7| &7Estado: &aReclamado ✔'
+      - '&7Recompensas'
+      - ''
+      - '&f &7» &f{reward_description}'
+      - ''
+      - '&f &7| &7Estado: &aReclamado ✔'
     unavailable:
       name: '{reward_name} &f- &x&F&F&E&9&1&2{threshold} Trofeos 🏆'
       lore:
-        - '&7Recompensas'
-        - ''
-        - '&f &7» &f{reward_description}'
-        - ''
-        - '&f &7| &7Estado: &cBloqueado ❌'
-        - '&f &7| &7Necesitas &c{remaining}&7 trofeos más'
-        - ''
-        - '&f &7| &7Progreso: &e{progress_percent}%'
-        - '&8[{progress_bar}&8]'
-
+      - '&7Recompensas'
+      - ''
+      - '&f &7» &f{reward_description}'
+      - ''
+      - '&f &7| &7Estado: &cBloqueado ❌'
+      - '&f &7| &7Necesitas &c{remaining}&7 trofeos más'
+      - ''
+      - '&f &7| &7Progreso: &e{progress_percent}%'
+      - '&8[{progress_bar}&8]'
+  
   # Configuración de los bordes decorativos
   decoration:
     enabled: true
     item: BLUE_STAINED_GLASS_PANE
     name: ' '
     positions:
-      - 0
-      - 1
-      - 2
-      - 3
-      - 5
-      - 6
-      - 7
-      - 8
-      - 9
-      - 17
-      - 18
-      - 26
-      - 27
-      - 35
-      - 36
-      - 44
-      - 46
-      - 47
-      - 48
-      - 49
-      - 50
-      - 51
-      - 52
-
+    - 0
+    - 1
+    - 2
+    - 3
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 17
+    - 18
+    - 26
+    - 27
+    - 35
+    - 36
+    - 44
+    - 46
+    - 47
+    - 48
+    - 49
+    - 50
+    - 51
+    - 52
+  
   # Diseño de cosméticos obtenibles por rangos de trofeos
   progression:
     start_from: 18
     pattern:
-      - 10
-      - 11
-      - 12
-      - 13
-      - 14
-      - 15
-      - 16
-      - 19
-      - 20
-      - 21
-      - 22
-      - 23
-      - 24
-      - 25
-      - 28
-      - 29
-      - 30
-      - 31
-      - 32
-      - 33
-      - 34
-      - 37
-      - 38
-      - 39
-      - 40
-      - 41
-      - 42
-      - 43
-
-  # Recompensas del camino de trofeos
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 28
+    - 29
+    - 30
+    - 31
+    - 32
+    - 33
+    - 34
+    - 37
+    - 38
+    - 39
+    - 40
+    - 41
+    - 42
+    - 43
   # Recompensas del camino de trofeos
   # Sistema de recompensas por trofeos
   rewards:
-    - required: 10
-      item: TRIPWIRE_HOOK
-      name: '&x&0&0&C&2&C&B&lL&x&0&4&B&9&D&5&lL&x&0&7&B&0&E&0&lA&x&0&B&A&7&E&A&lV&x&0&E&9&E&F&5&lE&x&1&2&9&5&F&F&lS'
-      commands:
-        - phoenixcrates givekey op %player% 2
-      description: 2 llaves &cop
-    - required: 250
-      item: GOLD_NUGGET
-      name: '&x&6&1&F&F&1&2&lD&x&6&1&F&F&1&2&lI&x&6&1&F&F&1&2&lN&x&6&1&F&F&1&2&lE&x&6&1&F&F&1&2&lR&x&6&1&F&F&1&2&lO'
-      commands:
-        - eco give %player% 5000
-      description: '&r&a5000$'
-    - required: 50
-      item: NETHER_STAR
-      name: '&x&F&F&D&D&1&2&lS&x&F&F&D&D&1&2&lT&x&F&F&D&D&1&2&lA&x&F&F&D&D&1&2&lR&x&F&F&D&D&1&2&lD&x&F&F&D&D&1&2&lR&x&F&F&D&D&1&2&lO&x&F&F&D&D&1&2&lP'
-      commands:
-        - kenistar give stardrop 5 %player%
-      description: '&r&ex5 Stardrops'
-    - required: 75
-      item: TRIPWIRE_HOOK
-      name: '&x&0&0&C&2&C&B&lL&x&0&4&B&9&D&5&lL&x&0&7&B&0&E&0&lA&x&0&B&A&7&E&A&lV&x&0&E&9&E&F&5&lE&x&1&2&9&5&F&F&lS'
-      commands:
-        - phoenixcrates givekey mitica %player% 5
-      description: 5 llaves &5Miticas
-    - required: 100
-      item: GOLDEN_APPLE
-      name: '&x&E&D&F&E&2&1&lM&x&E&D&F&E&2&1&lA&x&E&D&F&E&2&1&lN&x&E&D&F&E&2&1&lZ&x&E&D&F&E&2&1&lA&x&E&D&F&E&2&1&lN&x&E&D&F&E&2&1&lA&x&E&D&F&E&2&1&lS'
-      commands:
-        - give %player% golden_apple 128
-      description: '&r&ex128 Manzanas doradas'
-    - required: 125
-      item: EMERALD
-      name: '&x&2&1&F&E&2&8&lG&x&2&1&F&E&2&8&lE&x&2&1&F&E&2&8&lM&x&2&1&F&E&2&8&lA&x&2&1&F&E&2&8&lS'
-      commands:
-        - svar add gemas 15 %player%
-      description: '&r&ax15 Gemas'
-    - required: 150
-      item: CHEST
-      name: '&x&3&B&1&F&F&4&lM&x&2&F&2&9&E&2&lE&x&2&4&3&2&D&0&lC&x&1&8&3&C&B&E&lA&x&D&D&F&8&2&0&lG&x&D&D&F&8&2&0&lA&x&D&D&F&8&2&0&lJ&x&D&D&F&8&2&0&lA'
-      commands:
-        - kenistar give megacaja 1 %player%
-      description: '&r&ex1 Megacaja'
-    - required: 175
-      item: TRIPWIRE_HOOK
-      name: '&x&0&0&C&2&C&B&lL&x&0&4&B&9&D&5&lL&x&0&7&B&0&E&0&lA&x&0&B&A&7&E&A&lV&x&0&E&9&E&F&5&lE&x&1&2&9&5&F&F&lS'
-      commands:
-        - phoenixcrates givekey legendary %player% 3
-      description: 3 llaves &6Legendarias
-    - required: 200
-      item: GOLD_BLOCK
-      name: '&x&6&1&F&F&1&2&lD&x&6&1&F&F&1&2&lI&x&6&1&F&F&1&2&lN&x&6&1&F&F&1&2&lE&x&6&1&F&F&1&2&lR&x&6&1&F&F&1&2&lO'
-      commands:
-        - eco give %player% 20000
-      description: '&r&a20000$'
-    - required: 225
-      item: ENCHANTED_GOLDEN_APPLE
-      name: '&x&E&D&F&E&2&1&lM&x&E&D&F&E&2&1&lA&x&E&D&F&E&2&1&lN&x&E&D&F&E&2&1&lZ&x&E&D&F&E&2&1&lA&x&E&D&F&E&2&1&lN&x&E&D&F&E&2&1&lA&x&E&D&F&E&2&1&lS'
-      commands:
-        - give %player% enchanted_golden_apple 8
-      description: '&r&ex8 Manzanas doradas encantadas'
-    - required: 250
-      item: NETHER_STAR
-      name: '&x&F&F&D&D&1&2&lS&x&F&F&D&D&1&2&lT&x&F&F&D&D&1&2&lA&x&F&F&D&D&1&2&lR&x&F&F&D&D&1&2&lD&x&F&F&D&D&1&2&lR&x&F&F&D&D&1&2&lO&x&F&F&D&D&1&2&lP'
-      commands:
-        - kenistar give stardrop 7 %player%
-      description: '&r&ex7 Stardrops'
-    - required: 275
-      item: EMERALD
-      name: '&x&2&1&F&E&2&8&lG&x&2&1&F&E&2&8&lE&x&2&1&F&E&2&8&lM&x&2&1&F&E&2&8&lA&x&2&1&F&E&2&8&lS'
-      commands:
-        - svar add gemas 20 %player%
-      description: '&r&ax20 Gemas'
-    - required: 300
-      item: GOLD_BLOCK
-      name: '&x&6&1&F&F&1&2&lD&x&6&1&F&F&1&2&lI&x&6&1&F&F&1&2&lN&x&6&1&F&F&1&2&lE&x&6&1&F&F&1&2&lR&x&6&1&F&F&1&2&lO'
-      commands:
-        - eco give %player% 30000
-      description: '&r&a30000$'
-    - required: 350
-      item: IRON_HELMET
-      name: '&x&B&C&B&C&B&C&lK&x&B&C&B&C&B&C&lI&x&B&C&B&C&B&C&lT'
-      commands:
-        - kit give mvp %player% 1
-      description: '&r&dKit MVP'
-    - required: 400
-      item: TRIPWIRE_HOOK
-      name: '&x&0&0&C&2&C&B&lL&x&0&4&B&9&D&5&lL&x&0&7&B&0&E&0&lA&x&0&B&A&7&E&A&lV&x&0&E&9&E&F&5&lE&x&1&2&9&5&F&F&lS'
-      commands:
-        - phoenixcrates givekey op %player% 6
-      description: 6 llaves &cop
-    - required: 450
-      item: CHEST
-      name: '&x&3&B&1&F&F&4&lM&x&2&F&2&9&E&2&lE&x&2&4&3&2&D&0&lC&x&1&8&3&C&B&E&lA&x&D&D&F&8&2&0&lG&x&D&D&F&8&2&0&lA&x&D&D&F&8&2&0&lJ&x&D&D&F&8&2&0&lA'
-      commands:
-        - kenistar give megacaja 2 %player%
-      description: '&r&ex2 Megacajas'
-    - required: 500
-      item: GOLD_BLOCK
-      name: '&x&6&1&F&F&1&2&lD&x&6&1&F&F&1&2&lI&x&6&1&F&F&1&2&lN&x&6&1&F&F&1&2&lE&x&6&1&F&F&1&2&lR&x&6&1&F&F&1&2&lO'
-      commands:
-        - eco give %player% 45000
-      description: '&r&a45000$'
-    - required: 550
-      item: EMERALD
-      name: '&x&2&1&F&E&2&8&lG&x&2&1&F&E&2&8&lE&x&2&1&F&E&2&8&lM&x&2&1&F&E&2&8&lA&x&2&1&F&E&2&8&lS'
-      commands:
-        - svar add gemas 30 %player%
-      description: '&r&ax30 Gemas'
-    - required: 600
-      item: DIAMOND_HELMET
-      name: '&x&B&C&B&C&B&C&lK&x&B&C&B&C&B&C&lI&x&B&C&B&C&B&C&lT'
-      commands:
-        - kit give mvp+ %player% 1
-      description: '&r&bKit MVP+'
-    - required: 650
-      item: TRIPWIRE_HOOK
-      name: '&x&0&0&C&2&C&B&lL&x&0&4&B&9&D&5&lL&x&0&7&B&0&E&0&lA&x&0&B&A&7&E&A&lV&x&0&E&9&E&F&5&lE&x&1&2&9&5&F&F&lS'
-      commands:
-        - phoenixcrates givekey mitica %player% 4
-        - phoenixcrates givekey lucky %player% 10
-      description: 4 llaves &5Miticas + 10 Llaves &eLucky
-    - required: 700
-      item: NETHER_STAR
-      name: '&x&F&F&6&C&6&C&lC&x&F&F&6&C&6&C&lA&x&F&F&6&C&6&C&lS&x&F&F&6&C&6&C&lI&x&F&F&6&C&6&C&lT&x&F&F&6&C&6&C&lA'
-      commands:
-        - si give casita 3 %player%
-      description: '&r&ex3 Casitas'
-    - required: 750
-      item: GOLDEN_APPLE
-      name: '&x&E&D&F&E&2&1&lM&x&E&D&F&E&2&1&lA&x&E&D&F&E&2&1&lN&x&E&D&F&E&2&1&lZ&x&E&D&F&E&2&1&lA&x&E&D&F&E&2&1&lN&x&E&D&F&E&2&1&lA&x&E&D&F&E&2&1&lS'
-      commands:
-        - give %player% golden_apple 256
-        - give %player% enchanted_golden_apple 16
-      description: '&r&e256 Manzanas doradas + 16 encantadas'
-    - required: 800
-      item: GOLD_BLOCK
-      name: '&x&6&1&F&F&1&2&lD&x&6&1&F&F&1&2&lI&x&6&1&F&F&1&2&lN&x&6&1&F&F&1&2&lE&x&6&1&F&F&1&2&lR&x&6&1&F&F&1&2&lO'
-      commands:
-        - eco give %player% 55000
-      description: '&r&a55000$'
-    - required: 850
-      item: TRIPWIRE_HOOK
-      name: '&x&0&0&C&2&C&B&lL&x&0&4&B&9&D&5&lL&x&0&7&B&0&E&0&lA&x&0&B&A&7&E&A&lV&x&0&E&9&E&F&5&lE&x&1&2&9&5&F&F&lS'
-      commands:
-        - phoenixcrates givekey op %player% 8
-        - phoenixcrates givekey legendaria %player% 5
-      description: 8 llaves &cop + 5 llaves &6Legendarias
-    - required: 900
-      item: NETHERITE_HELMET
-      name: '&x&B&C&B&C&B&C&lK&x&B&C&B&C&B&C&lI&x&B&C&B&C&B&C&lT'
-      commands:
-        - kit give insano %player% 1
-      description: '&r&4Kit Insano'
-    - required: 950
-      item: EMERALD_BLOCK
-      name: '&x&2&1&F&E&2&8&lG&x&2&1&F&E&2&8&lE&x&2&1&F&E&2&8&lM&x&2&1&F&E&2&8&lA&x&2&1&F&E&2&8&lS'
-      commands:
-        - svar add gemas 50 %player%
-      description: '&r&ax50 Gemas'
-    - required: 1000
-      item: BEACON
-      name: '&x&F&F&D&D&1&2&lP&x&F&F&D&D&1&2&lA&x&F&F&D&D&1&2&lQ&x&F&F&D&D&1&2&lU&x&F&F&D&D&1&2&lE&x&F&F&D&D&1&2&lT&x&F&F&D&D&1&2&lE
-      &x&F&F&D&D&1&2&lD&x&F&F&D&D&1&2&lE&x&F&F&D&D&1&2&lL &x&F&F&D&D&1&2&lC&x&F&F&D&D&1&2&lA&x&F&F&D&D&1&2&lM&x&F&F&D&D&1&2&lP&x&F&F&D&D&1&2&lE&x&F&F&D&D&1&2&lO&x&F&F&D&D&1&2&lN'
-      commands:
-        - eco give %player% 100000
-        - phoenixcrates givekey op %player% 10
-        - phoenixcrates givekey legendaria %player% 10
-        - phoenixcrates givekey mitica %player% 10
-        - kenistar give stardrop 10 %player%
-        - kenistar give megacaja 3 %player%
-        - si give casita 5 %player%
-        - si give capsula 5 %player%
-        - svar add gemas 100 %player%
-        - give %player% enchanted_golden_apple 32
-      description: '&r&e¡El gran paquete del campeón!'
-      broadcast: true
-      broadcast_message: '&6&l¡FELICIDADES! &e%player% &6ha alcanzado &e1000 trofeos
-      &6y ha recibido el &e&lPAQUETE DEL CAMPEÓN&6!'
-
+  - required: 5
+    item: GOLD_NUGGET
+    name: '&x&F&F&D&7&0&0&lR&x&F&F&C&F&0&0&lE&x&F&F&C&7&0&0&lC&x&F&F&B&F&0&0&lO&x&F&F&B&7&0&0&lM&x&F&F&A&F&0&0&lP&x&F&F&A&7&0&0&lE&x&F&F&9&F&0&0&lN&x&F&F&9&7&0&0&lS&x&F&F&8&F&0&0&lA'
+    commands:
+    - eco give %player% 500
+    description: '&r&a500$'
+  - required: 10
+    item: GOLDEN_APPLE
+    name: '&x&F&F&D&7&0&0&lR&x&F&F&C&F&0&0&lE&x&F&F&C&7&0&0&lC&x&F&F&B&F&0&0&lO&x&F&F&B&7&0&0&lM&x&F&F&A&F&0&0&lP&x&F&F&A&7&0&0&lE&x&F&F&9&F&0&0&lN&x&F&F&9&7&0&0&lS&x&F&F&8&F&0&0&lA'
+    commands:
+    - give %player% golden_apple 3
+    description: '&r&ex3 Manzanas doradas'
+  - required: 15
+    item: EMERALD
+    name: '&x&F&F&D&7&0&0&lR&x&F&F&C&F&0&0&lE&x&F&F&C&7&0&0&lC&x&F&F&B&F&0&0&lO&x&F&F&B&7&0&0&lM&x&F&F&A&F&0&0&lP&x&F&F&A&7&0&0&lE&x&F&F&9&F&0&0&lN&x&F&F&9&7&0&0&lS&x&F&F&8&F&0&0&lA'
+    commands:
+    - kenicompetitivo addgems %player% 1
+    - phoenixcrates givekey lucky %player% 1
+    description: '&r&ax1 Gema &e+ &r&dx1 Llave Lucky'
+  - required: 20
+    item: TOTEM_OF_UNDYING
+    name: '&x&F&F&D&7&0&0&lR&x&F&F&C&F&0&0&lE&x&F&F&C&7&0&0&lC&x&F&F&B&F&0&0&lO&x&F&F&B&7&0&0&lM&x&F&F&A&F&0&0&lP&x&F&F&A&7&0&0&lE&x&F&F&9&F&0&0&lN&x&F&F&9&7&0&0&lS&x&F&F&8&F&0&0&lA'
+    commands:
+    - si give totem 1 %player%
+    - eco give %player% 1000
+    description: '&r&ex1 Tótem &e+ &r&a1000$'
+  - required: 25
+    item: ENDER_CHEST
+    name: '&x&F&F&D&7&0&0&lR&x&F&F&C&F&0&0&lE&x&F&F&C&7&0&0&lC&x&F&F&B&F&0&0&lO&x&F&F&B&7&0&0&lM&x&F&F&A&F&0&0&lP&x&F&F&A&7&0&0&lE&x&F&F&9&F&0&0&lN&x&F&F&9&7&0&0&lS&x&F&F&8&F&0&0&lA'
+    commands:
+    - keniitems give %player% small_capsule 1
+    - phoenixcrates givekey keyall %player% 1
+    description: '&r&bx1 Cápsula pequeña &e+ &r&dx1 Llave Keyall'
+  - required: 30
+    item: DIAMOND
+    name: '&x&F&F&D&7&0&0&lR&x&F&F&C&F&0&0&lE&x&F&F&C&7&0&0&lC&x&F&F&B&F&0&0&lO&x&F&F&B&7&0&0&lM&x&F&F&A&F&0&0&lP&x&F&F&A&7&0&0&lE&x&F&F&9&F&0&0&lN&x&F&F&9&7&0&0&lS&x&F&F&8&F&0&0&lA'
+    commands:
+    - kenicompetitivo addgems %player% 2
+    - eco give %player% 1500
+    description: '&r&ax2 Gemas &e+ &r&a1500$'
+  - required: 35
+    item: NETHER_STAR
+    name: '&x&F&F&D&7&0&0&lR&x&F&F&C&F&0&0&lE&x&F&F&C&7&0&0&lC&x&F&F&B&F&0&0&lO&x&F&F&B&7&0&0&lM&x&F&F&A&F&0&0&lP&x&F&F&A&7&0&0&lE&x&F&F&9&F&0&0&lN&x&F&F&9&7&0&0&lS&x&F&F&8&F&0&0&lA'
+    commands:
+    - phoenixcrates givekey legendaria %player% 1
+    - give %player% golden_apple 5
+    description: '&r&dx1 Llave Legendaria &e+ &r&ex5 Manzanas doradas'
+  - required: 40
+    item: BEACON
+    name: '&x&F&F&D&7&0&0&lR&x&F&F&C&F&0&0&lE&x&F&F&C&7&0&0&lC&x&F&F&B&F&0&0&lO&x&F&F&B&7&0&0&lM&x&F&F&A&F&0&0&lP&x&F&F&A&7&0&0&lE&x&F&F&9&F&0&0&lN&x&F&F&9&7&0&0&lS&x&F&F&8&F&0&0&lA'
+    commands:
+    - give %player% beacon 1
+    - keniitems give %player% casita 1
+    description: '&r&fx1 Faro &e+ &r&bx1 Casita'
+  - required: 45
+    item: ENCHANTED_GOLDEN_APPLE
+    name: '&x&F&F&D&7&0&0&lR&x&F&F&C&F&0&0&lE&x&F&F&C&7&0&0&lC&x&F&F&B&F&0&0&lO&x&F&F&B&7&0&0&lM&x&F&F&A&F&0&0&lP&x&F&F&A&7&0&0&lE&x&F&F&9&F&0&0&lN&x&F&F&9&7&0&0&lS&x&F&F&8&F&0&0&lA'
+    commands:
+    - give %player% enchanted_golden_apple 2
+    - kenistar give stardrop 1 %player%
+    description: '&r&ex2 Manzanas de Notch &e+ &r&dx1 Stardrop'
+  - required: 50
+    item: DRAGON_HEAD
+    name: '&x&F&F&D&7&0&0&lR&x&F&F&C&F&0&0&lE&x&F&F&C&7&0&0&lC&x&F&F&B&F&0&0&lO&x&F&F&B&7&0&0&lM&x&F&F&A&F&0&0&lP&x&F&F&A&7&0&0&lE&x&F&F&9&F&0&0&lN&x&F&F&9&7&0&0&lS&x&F&F&8&F&0&0&lA'
+    commands:
+    - phoenixcrates givekey op %player% 1
+    - eco give %player% 3000
+    - kit give vip %player%
+    description: '&r&dx1 Llave OP &e+ &r&a3000$ &e+ &r&bKit VIP'
+  - required: 60
+    item: DIAMOND_BLOCK
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - kenicompetitivo addgems %player% 3
+    - si give fragmento 1 %player%
+    description: '&r&ax3 Gemas &e+ &r&cx1 Fragmento'
+  - required: 70
+    item: NETHERITE_INGOT
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - phoenixcrates givekey heroica %player% 1
+    - keniitems give %player% capsule 1
+    description: '&r&dx1 Llave Heroica &e+ &r&bx1 Cápsula'
+  - required: 80
+    item: GOLDEN_APPLE
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - give %player% golden_apple 10
+    - give %player% beacon 2
+    - eco give %player% 5000
+    description: '&r&ex10 Manzanas doradas &e+ &r&fx2 Faros &e+ &r&a5000$'
+  - required: 90
+    item: ENCHANTED_BOOK
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - phoenixcrates givekey lucky %player% 3
+    - phoenixcrates givekey keyall %player% 2
+    description: '&r&dx3 Llaves Lucky &e+ &r&dx2 Llaves Keyall'
+  - required: 100
+    item: EMERALD_BLOCK
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - kenicompetitivo addgems %player% 5
+    - kit give vip+ %player%
+    description: '&r&ax5 Gemas &e+ &r&bKit VIP+'
+  - required: 110
+    item: NETHER_STAR
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - kenistar give stardrop 2 %player%
+    - phoenixcrates givekey mitica %player% 1
+    description: '&r&dx2 Stardrops &e+ &r&dx1 Llave Mítica'
+  - required: 120
+    item: TOTEM_OF_UNDYING
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - si give totem 2 %player%
+    - keniitems give %player% player_capsule 1
+    description: '&r&ex2 Tótems &e+ &r&bx1 Cápsula de Jugador'
+  - required: 130
+    item: ENCHANTED_GOLDEN_APPLE
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - give %player% enchanted_golden_apple 3
+    - si give fragmento 1 %player%
+    description: '&r&ex3 Manzanas de Notch &e+ &r&cx1 Fragmento'
+  - required: 140
+    item: END_PORTAL_FRAME
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - eco give %player% 10000
+    - phoenixcrates givekey legendaria %player% 2
+    description: '&r&a10000$ &e+ &r&dx2 Llaves Legendarias'
+  - required: 150
+    item: DRAGON_EGG
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - kit give mvp %player%
+    - keniitems give %player% crafting_capsule 1
+    description: '&r&bKit MVP &e+ &r&bx1 Cápsula de Crafteo'
+  - required: 160
+    item: BEACON
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - give %player% beacon 3
+    - phoenixcrates givekey kit %player% 1
+    description: '&r&fx3 Faros &e+ &r&dx1 Llave Kit'
+  - required: 170
+    item: NETHERITE_BLOCK
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - kenicompetitivo addgems %player% 7
+    - phoenixcrates givekey op %player% 1
+    description: '&r&ax7 Gemas &e+ &r&dx1 Llave OP'
+  - required: 180
+    item: ELYTRA
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - si give totem 3 %player%
+    - kenistar give stardrop 2 %player%
+    description: '&r&ex3 Tótems &e+ &r&dx2 Stardrops'
+  - required: 190
+    item: LODESTONE
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - eco give %player% 15000
+    - phoenixcrates givekey mitica %player% 2
+    description: '&r&a15000$ &e+ &r&dx2 Llaves Míticas'
+  - required: 200
+    item: CONDUIT
+    name: '&x&0&0&B&F&F&F&lR&x&0&0&A&F&F&F&lE&x&0&0&9&F&F&F&lC&x&0&0&8&F&F&F&lO&x&0&0&7&F&F&F&lM&x&0&0&6&F&F&F&lP&x&0&0&5&F&F&F&lE&x&0&0&4&F&F&F&lN&x&0&0&3&F&F&F&lS&x&0&0&2&F&F&F&lA'
+    commands:
+    - kit give mvp+ %player%
+    - si give fragmento 2 %player%
+    - kenistar give megacaja 1 %player%
+    description: '&r&bKit MVP+ &e+ &r&cx2 Fragmentos &e+ &r&dx1 Megacaja'
+  - required: 220
+    item: ENCHANTED_GOLDEN_APPLE
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - give %player% enchanted_golden_apple 5
+    - phoenixcrates givekey legendaria %player% 2
+    description: '&r&ex5 Manzanas de Notch &e+ &r&dx2 Llaves Legendarias'
+  - required: 240
+    item: DRAGON_HEAD
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - phoenixcrates givekey heroica %player% 2
+    - phoenixcrates givekey kit %player% 1
+    description: '&r&dx2 Llaves Heroicas &e+ &r&dx1 Llave Kit'
+  - required: 260
+    item: BEACON
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - give %player% beacon 5
+    - eco give %player% 20000
+    description: '&r&fx5 Faros &e+ &r&a20000$'
+  - required: 280
+    item: NETHER_STAR
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - kenistar give stardrop 3 %player%
+    - si give fragmento 2 %player%
+    description: '&r&dx3 Stardrops &e+ &r&cx2 Fragmentos'
+  - required: 300
+    item: GOLDEN_APPLE
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - kit give insano %player%
+    - phoenixcrates givekey op %player% 2
+    description: '&r&bKit Insano &e+ &r&dx2 Llaves OP'
+  - required: 320
+    item: EMERALD_BLOCK
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - kenicompetitivo addgems %player% 10
+    - keniitems give %player% casita 2
+    description: '&r&ax10 Gemas &e+ &r&bx2 Casitas'
+  - required: 340
+    item: TOTEM_OF_UNDYING
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - si give totem 5 %player%
+    - eco give %player% 25000
+    description: '&r&ex5 Tótems &e+ &r&a25000$'
+  - required: 360
+    item: NETHERITE_BLOCK
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - phoenixcrates givekey mitica %player% 2
+    - kenistar give megacaja 1 %player%
+    description: '&r&dx2 Llaves Míticas &e+ &r&dx1 Megacaja'
+  - required: 380
+    item: END_PORTAL_FRAME
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - keniitems give %player% player_capsule 2
+    - phoenixcrates givekey heroica %player% 3
+    description: '&r&bx2 Cápsulas de Jugador &e+ &r&dx3 Llaves Heroicas'
+  - required: 400
+    item: DRAGON_EGG
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - kit give keni %player%
+    - si give fragmento 3 %player%
+    description: '&r&bKit Keni &e+ &r&cx3 Fragmentos'
+  - required: 420
+    item: ENCHANTED_GOLDEN_APPLE
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - give %player% enchanted_golden_apple 8
+    - eco give %player% 30000
+    description: '&r&ex8 Manzanas de Notch &e+ &r&a30000$'
+  - required: 440
+    item: BEACON
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - give %player% beacon 7
+    - phoenixcrates givekey kit %player% 2
+    description: '&r&fx7 Faros &e+ &r&dx2 Llaves Kit'
+  - required: 460
+    item: NETHER_STAR
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - kenistar give stardrop 5 %player%
+    - keniitems give %player% crafting_capsule 2
+    description: '&r&dx5 Stardrops &e+ &r&bx2 Cápsulas de Crafteo'
+  - required: 480
+    item: EMERALD_BLOCK
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - kenicompetitivo addgems %player% 15
+    - phoenixcrates givekey op %player% 2
+    description: '&r&ax15 Gemas &e+ &r&dx2 Llaves OP'
+  - required: 500
+    item: CONDUIT
+    name: '&x&F&F&0&0&F&F&lR&x&F&F&1&F&E&F&lE&x&F&F&3&F&D&F&lC&x&F&F&5&F&C&F&lO&x&F&F&7&F&B&F&lM&x&F&F&9&F&A&F&lP&x&F&F&B&F&9&F&lE&x&F&F&D&F&8&F&lN&x&F&F&F&F&7&F&lS&x&E&F&F&F&6&F&lA'
+    commands:
+    - kit give box %player%
+    - kenistar give megacaja 2 %player%
+    - eco give %player% 35000
+    description: '&r&bKit Box &e+ &r&dx2 Megacajas &e+ &r&a35000$'
+  - required: 525
+    item: TOTEM_OF_UNDYING
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - si give totem 7 %player%
+    - phoenixcrates givekey legendaria %player% 3
+    description: '&r&ex7 Tótems &e+ &r&dx3 Llaves Legendarias'
+  - required: 550
+    item: BEACON
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - give %player% beacon 10
+    - eco give %player% 40000
+    description: '&r&fx10 Faros &e+ &r&a40000$'
+  - required: 575
+    item: NETHER_STAR
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - kenistar give stardrop 7 %player%
+    - phoenixcrates givekey heroica %player% 3
+    description: '&r&dx7 Stardrops &e+ &r&dx3 Llaves Heroicas'
+  - required: 600
+    item: DRAGON_EGG
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - kit give influencer %player%
+    - si give fragmento 4 %player%
+    description: '&r&bKit Influencer &e+ &r&cx4 Fragmentos'
+  - required: 625
+    item: EMERALD_BLOCK
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - kenicompetitivo addgems %player% 20
+    - phoenixcrates givekey mitica %player% 3
+    description: '&r&ax20 Gemas &e+ &r&dx3 Llaves Míticas'
+  - required: 650
+    item: ENCHANTED_GOLDEN_APPLE
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - give %player% enchanted_golden_apple 10
+    - keniitems give %player% player_capsule 3
+    description: '&r&ex10 Manzanas de Notch &e+ &r&bx3 Cápsulas de Jugador'
+  - required: 675
+    item: END_PORTAL_FRAME
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - eco give %player% 50000
+    - phoenixcrates givekey kit %player% 3
+    description: '&r&a50000$ &e+ &r&dx3 Llaves Kit'
+  - required: 700
+    item: NETHERITE_BLOCK
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - phoenixcrates givekey op %player% 3
+    - kenistar give megacaja 2 %player%
+    description: '&r&dx3 Llaves OP &e+ &r&dx2 Megacajas'
+  - required: 725
+    item: TOTEM_OF_UNDYING
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - si give totem 8 %player%
+    - keniitems give %player% casita 3
+    description: '&r&ex8 Tótems &e+ &r&bx3 Casitas'
+  - required: 750
+    item: DRAGON_HEAD
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - kit give famoso %player%
+    - eco give %player% 60000
+    description: '&r&bKit Famoso &e+ &r&a60000$'
+  - required: 775
+    item: NETHER_STAR
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - kenistar give stardrop 8 %player%
+    - si give fragmento 4 %player%
+    description: '&r&dx8 Stardrops &e+ &r&cx4 Fragmentos'
+  - required: 800
+    item: EMERALD_BLOCK
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - kenicompetitivo addgems %player% 25
+    - keniitems give %player% crafting_capsule 3
+    description: '&r&ax25 Gemas &e+ &r&bx3 Cápsulas de Crafteo'
+  - required: 825
+    item: BEACON
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - give %player% beacon 12
+    - phoenixcrates givekey legendaria %player% 4
+    description: '&r&fx12 Faros &e+ &r&dx4 Llaves Legendarias'
+  - required: 850
+    item: ELYTRA
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - phoenixcrates givekey heroica %player% 4
+    - phoenixcrates givekey mitica %player% 3
+    description: '&r&dx4 Llaves Heroicas &e+ &r&dx3 Llaves Míticas'
+  - required: 875
+    item: ENCHANTED_GOLDEN_APPLE
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - give %player% enchanted_golden_apple 12
+    - eco give %player% 70000
+    description: '&r&ex12 Manzanas de Notch &e+ &r&a70000$'
+  - required: 900
+    item: LODESTONE
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - phoenixcrates givekey kit %player% 4
+    - kenistar give megacaja 3 %player%
+    description: '&r&dx4 Llaves Kit &e+ &r&dx3 Megacajas'
+  - required: 925
+    item: TOTEM_OF_UNDYING
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - si give totem 10 %player%
+    - keniitems give %player% player_capsule 4
+    description: '&r&ex10 Tótems &e+ &r&bx4 Cápsulas de Jugador'
+  - required: 950
+    item: NETHER_STAR
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - kenistar give stardrop 10 %player%
+    - si give fragmento 5 %player%
+    description: '&r&dx10 Stardrops &e+ &r&cx5 Fragmentos'
+  - required: 975
+    item: DRAGON_EGG
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - phoenixcrates givekey op %player% 4
+    - eco give %player% 80000
+    description: '&r&dx4 Llaves OP &e+ &r&a80000$'
+  - required: 1000
+    item: CONDUIT
+    name: '&x&8&A&0&0&F&F&lR&x&8&D&1&E&E&F&lE&x&9&1&3&C&D&F&lC&x&9&4&5&A&C&F&lO&x&9&8&7&8&B&F&lM&x&9&B&9&6&A&F&lP&x&9&F&B&4&9&F&lE&x&A&2&D&2&8&F&lN&x&A&6&F&0&7&F&lS&x&A&9&F&F&6&F&lA'
+    commands:
+    - kit give owner-media %player%
+    - kenicompetitivo addgems %player% 30
+    - kenistar give megacaja 4 %player%
+    description: '&r&bKit Owner-Media &e+ &r&ax30 Gemas &e+ &r&dx4 Megacajas'
+  - required: 1050
+    item: BEACON
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - give %player% beacon 15
+    - eco give %player% 90000
+    description: '&r&fx15 Faros &e+ &r&a90000$'
+  - required: 1100
+    item: EMERALD_BLOCK
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - kenicompetitivo addgems %player% 35
+    - phoenixcrates givekey legendaria %player% 5
+    description: '&r&ax35 Gemas &e+ &r&dx5 Llaves Legendarias'
+  - required: 1150
+    item: TOTEM_OF_UNDYING
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - si give totem 10 %player%
+    - keniitems give %player% casita 4
+    description: '&r&ex10 Tótems &e+ &r&bx4 Casitas'
+  - required: 1200
+    item: DRAGON_HEAD
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - phoenixcrates givekey heroica %player% 5
+    - phoenixcrates givekey mitica %player% 4
+    description: '&r&dx5 Llaves Heroicas &e+ &r&dx4 Llaves Míticas'
+  - required: 1250
+    item: ENCHANTED_GOLDEN_APPLE
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - give %player% enchanted_golden_apple 15
+    - eco give %player% 100000
+    description: '&r&ex15 Manzanas de Notch &e+ &r&a100000$'
+  - required: 1300
+    item: NETHER_STAR
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - kenistar give stardrop 10 %player%
+    - si give fragmento 5 %player%
+    description: '&r&dx10 Stardrops &e+ &r&cx5 Fragmentos'
+  - required: 1350
+    item: END_PORTAL_FRAME
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - phoenixcrates givekey kit %player% 5
+    - keniitems give %player% player_capsule 5
+    description: '&r&dx5 Llaves Kit &e+ &r&bx5 Cápsulas de Jugador'
+  - required: 1400
+    item: NETHERITE_BLOCK
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - phoenixcrates givekey op %player% 5
+    - kenicompetitivo addgems %player% 40
+    description: '&r&dx5 Llaves OP &e+ &r&ax40 Gemas'
+  - required: 1450
+    item: DRAGON_EGG
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - kenistar give megacaja 4 %player%
+    - keniitems give %player% crafting_capsule 4
+    description: '&r&dx4 Megacajas &e+ &r&bx4 Cápsulas de Crafteo'
+  - required: 1500
+    item: CONDUIT
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - eco give %player% 100000
+    - phoenixcrates givekey legendaria %player% 5
+    - phoenixcrates givekey heroica %player% 5
+    description: '&r&a100000$ &e+ &r&dx5 Llaves Legendarias &e+ &r&dx5 Llaves Heroicas'
+  - required: 1550
+    item: EMERALD_BLOCK
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - kenicompetitivo addgems %player% 45
+    - si give fragmento 5 %player%
+    description: '&r&ax45 Gemas &e+ &r&cx5 Fragmentos'
+  - required: 1600
+    item: BEACON
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - give %player% beacon 15
+    - phoenixcrates givekey mitica %player% 5
+    description: '&r&fx15 Faros &e+ &r&dx5 Llaves Míticas'
+  - required: 1650
+    item: TOTEM_OF_UNDYING
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - si give totem 10 %player%
+    - kenistar give stardrop 10 %player%
+    description: '&r&ex10 Tótems &e+ &r&dx10 Stardrops'
+  - required: 1700
+    item: ENCHANTED_GOLDEN_APPLE
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - give %player% enchanted_golden_apple 15
+    - phoenixcrates givekey kit %player% 5
+    description: '&r&ex15 Manzanas de Notch &e+ &r&dx5 Llaves Kit'
+  - required: 1750
+    item: DRAGON_HEAD
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - phoenixcrates givekey op %player% 5
+    - eco give %player% 100000
+    description: '&r&dx5 Llaves OP &e+ &r&a100000$'
+  - required: 1800
+    item: LODESTONE
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - keniitems give %player% player_capsule 5
+    - keniitems give %player% casita 5
+    description: '&r&bx5 Cápsulas de Jugador &e+ &r&bx5 Casitas'
+  - required: 1850
+    item: NETHER_STAR
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - kenistar give stardrop 10 %player%
+    - kenicompetitivo addgems %player% 50
+    description: '&r&dx10 Stardrops &e+ &r&ax50 Gemas'
+  - required: 1900
+    item: END_PORTAL_FRAME
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - phoenixcrates givekey legendaria %player% 6
+    - phoenixcrates givekey heroica %player% 6
+    description: '&r&dx6 Llaves Legendarias &e+ &r&dx6 Llaves Heroicas'
+  - required: 1950
+    item: DRAGON_EGG
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - kenistar give megacaja 5 %player%
+    - si give fragmento 5 %player%
+    description: '&r&dx5 Megacajas &e+ &r&cx5 Fragmentos'
+  - required: 2000
+    item: CONDUIT
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - phoenixcrates givekey mitica %player% 6
+    - phoenixcrates givekey kit %player% 6
+    - phoenixcrates givekey op %player% 6
+    description: '&r&dx6 Llaves Míticas &e+ &r&dx6 Llaves Kit &e+ &r&dx6 Llaves OP'
+  - required: 2050
+    item: BEACON
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - give %player% beacon 15
+    - kenicompetitivo addgems %player% 55
+    description: '&r&fx15 Faros &e+ &r&ax55 Gemas'
+  - required: 2100
+    item: TOTEM_OF_UNDYING
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - si give totem 10 %player%
+    - eco give %player% 100000
+    description: '&r&ex10 Tótems &e+ &r&a100000$'
+  - required: 2150
+    item: ENCHANTED_GOLDEN_APPLE
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - give %player% enchanted_golden_apple 15
+    - keniitems give %player% crafting_capsule 5
+    description: '&r&ex15 Manzanas de Notch &e+ &r&bx5 Cápsulas de Crafteo'
+  - required: 2200
+    item: EMERALD_BLOCK
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - kenicompetitivo addgems %player% 60
+    - kenistar give stardrop 10 %player%
+    description: '&r&ax60 Gemas &e+ &r&dx10 Stardrops'
+  - required: 2250
+    item: NETHERITE_BLOCK
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - phoenixcrates givekey legendaria %player% 6
+    - phoenixcrates givekey mitica %player% 6
+    description: '&r&dx6 Llaves Legendarias &e+ &r&dx6 Llaves Míticas'
+  - required: 2300
+    item: DRAGON_HEAD
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - phoenixcrates givekey heroica %player% 6
+    - phoenixcrates givekey op %player% 6
+    description: '&r&dx6 Llaves Heroicas &e+ &r&dx6 Llaves OP'
+  - required: 2350
+    item: NETHER_STAR
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - kenistar give stardrop 10 %player%
+    - si give fragmento 5 %player%
+    description: '&r&dx10 Stardrops &e+ &r&cx5 Fragmentos'
+  - required: 2400
+    item: DRAGON_EGG
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - kenistar give megacaja 5 %player%
+    - eco give %player% 100000
+    description: '&r&dx5 Megacajas &e+ &r&a100000$'
+  - required: 2450
+    item: END_PORTAL_FRAME
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - phoenixcrates givekey kit %player% 6
+    - kenicompetitivo addgems %player% 65
+    description: '&r&dx6 Llaves Kit &e+ &r&ax65 Gemas'
+  - required: 2500
+    item: CONDUIT
+    name: '&x&F&F&0&0&7&B&lR&x&F&F&1&E&7&3&lE&x&F&F&3&C&6&B&lC&x&F&F&5&A&6&3&lO&x&F&F&7&8&5&B&lM&x&F&F&9&6&5&2&lP&x&F&F&B&4&4&A&lE&x&F&F&D&2&4&2&lN&x&F&F&F&0&3&A&lS&x&F&F&F&F&3&2&lA'
+    commands:
+    - phoenixcrates givekey legendaria %player% 7
+    - phoenixcrates givekey heroica %player% 7
+    - phoenixcrates givekey mitica %player% 7
+    - phoenixcrates givekey kit %player% 7
+    - phoenixcrates givekey op %player% 7
+    description: '&r&dx7 Llaves de cada tipo'
+  - required: 2600
+    item: BEACON
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - give %player% beacon 15
+    - kenistar give stardrop 10 %player%
+    description: '&r&fx15 Faros &e+ &r&dx10 Stardrops'
+  - required: 2700
+    item: EMERALD_BLOCK
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - kenicompetitivo addgems %player% 70
+    - eco give %player% 100000
+    description: '&r&ax70 Gemas &e+ &r&a100000$'
+  - required: 2800
+    item: TOTEM_OF_UNDYING
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - si give totem 10 %player%
+    - si give fragmento 5 %player%
+    description: '&r&ex10 Tótems &e+ &r&cx5 Fragmentos'
+  - required: 2900
+    item: ENCHANTED_GOLDEN_APPLE
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - give %player% enchanted_golden_apple 15
+    - kenistar give megacaja 5 %player%
+    description: '&r&ex15 Manzanas de Notch &e+ &r&dx5 Megacajas'
+  - required: 3000
+    item: CONDUIT
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - phoenixcrates givekey legendaria %player% 8
+    - phoenixcrates givekey heroica %player% 8
+    - phoenixcrates givekey mitica %player% 8
+    description: '&r&dx8 Llaves Legendarias &e+ &r&dx8 Llaves Heroicas &e+ &r&dx8
+      Llaves Míticas'
+  - required: 3100
+    item: NETHERITE_BLOCK
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - phoenixcrates givekey kit %player% 8
+    - phoenixcrates givekey op %player% 8
+    description: '&r&dx8 Llaves Kit &e+ &r&dx8 Llaves OP'
+  - required: 3200
+    item: DRAGON_HEAD
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - keniitems give %player% player_capsule 6
+    - keniitems give %player% casita 6
+    description: '&r&bx6 Cápsulas de Jugador &e+ &r&bx6 Casitas'
+  - required: 3300
+    item: NETHER_STAR
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - kenistar give stardrop 10 %player%
+    - kenicompetitivo addgems %player% 75
+    description: '&r&dx10 Stardrops &e+ &r&ax75 Gemas'
+  - required: 3400
+    item: BEACON
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - give %player% beacon 15
+    - eco give %player% 100000
+    description: '&r&fx15 Faros &e+ &r&a100000$'
+  - required: 3500
+    item: DRAGON_EGG
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - kenistar give megacaja 5 %player%
+    - si give fragmento 5 %player%
+    description: '&r&dx5 Megacajas &e+ &r&cx5 Fragmentos'
+  - required: 3600
+    item: TOTEM_OF_UNDYING
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - si give totem 10 %player%
+    - keniitems give %player% crafting_capsule 6
+    description: '&r&ex10 Tótems &e+ &r&bx6 Cápsulas de Crafteo'
+  - required: 3700
+    item: ENCHANTED_GOLDEN_APPLE
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - give %player% enchanted_golden_apple 15
+    - phoenixcrates givekey legendaria %player% 8
+    description: '&r&ex15 Manzanas de Notch &e+ &r&dx8 Llaves Legendarias'
+  - required: 3800
+    item: END_PORTAL_FRAME
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - phoenixcrates givekey heroica %player% 8
+    - phoenixcrates givekey mitica %player% 8
+    description: '&r&dx8 Llaves Heroicas &e+ &r&dx8 Llaves Míticas'
+  - required: 3900
+    item: EMERALD_BLOCK
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - kenicompetitivo addgems %player% 80
+    - phoenixcrates givekey kit %player% 8
+    description: '&r&ax80 Gemas &e+ &r&dx8 Llaves Kit'
+  - required: 4000
+    item: CONDUIT
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - phoenixcrates givekey op %player% 9
+    - eco give %player% 100000
+    description: '&r&dx9 Llaves OP &e+ &r&a100000$'
+  - required: 4500
+    item: DRAGON_HEAD
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - phoenixcrates givekey legendaria %player% 9
+    - phoenixcrates givekey heroica %player% 9
+    - phoenixcrates givekey mitica %player% 9
+    description: '&r&dx9 Llaves Legendarias &e+ &r&dx9 Llaves Heroicas &e+ &r&dx9
+      Llaves Míticas'
+  - required: 5000
+    item: CONDUIT
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - phoenixcrates givekey kit %player% 9
+    - phoenixcrates givekey op %player% 9
+    - kenicompetitivo addgems %player% 100
+    description: '&r&dx9 Llaves Kit &e+ &r&dx9 Llaves OP &e+ &r&ax100 Gemas'
+  - required: 6000
+    item: DRAGON_EGG
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - kenistar give megacaja 5 %player%
+    - si give fragmento 5 %player%
+    - kenistar give stardrop 10 %player%
+    description: '&r&dx5 Megacajas &e+ &r&cx5 Fragmentos &e+ &r&dx10 Stardrops'
+  - required: 7000
+    item: NETHERITE_BLOCK
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - keniitems give %player% player_capsule 8
+    - keniitems give %player% casita 8
+    - keniitems give %player% crafting_capsule 8
+    description: '&r&bx8 de cada tipo de cápsula'
+  - required: 8000
+    item: END_PORTAL_FRAME
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - phoenixcrates givekey legendaria %player% 10
+    - phoenixcrates givekey heroica %player% 10
+    - phoenixcrates givekey mitica %player% 10
+    description: '&r&dx10 Llaves Legendarias &e+ &r&dx10 Llaves Heroicas &e+ &r&dx10
+      Llaves Míticas'
+  - required: 9000
+    item: TOTEM_OF_UNDYING
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - si give totem 10 %player%
+    - phoenixcrates givekey kit %player% 10
+    - phoenixcrates givekey op %player% 10
+    description: '&r&ex10 Tótems &e+ &r&dx10 Llaves Kit &e+ &r&dx10 Llaves OP'
+  - required: 10000
+    item: CONDUIT
+    name: '&x&A&0&2&0&F&F&lR&x&9&3&3&0&F&F&lE&x&8&6&4&0&F&F&lC&x&7&9&5&0&F&F&lO&x&6&C&6&0&F&F&lM&x&5&F&7&0&F&F&lP&x&5&2&8&0&F&F&lE&x&4&5&9&0&F&F&lN&x&3&8&A&0&F&F&lS&x&2&B&B&0&F&F&lA'
+    commands:
+    - eco give %player% 100000
+    - kenicompetitivo addgems %player% 150
+    - kenistar give megacaja 5 %player%
+    - kenistar give stardrop 10 %player%
+    - si give fragmento 5 %player%
+    - give %player% enchanted_golden_apple 15
+    - give %player% beacon 15
+    description: '&r&a100000$ &e+ &r&ax150 Gemas &e+ &r&dMegapremio de recursos'
+  
   # Configuración de los efectos de recompensa
   reward_effects:
     # Efectos ya existentes traducidos
@@ -435,18 +1060,18 @@ panel:
         volume: 1.0
         pitch: 0.5
       particles:
-        - type: TOTEM
-          count: 100
-          offsetX: 0.7
-          offsetY: 0.7
-          offsetZ: 0.7
-          speed: 0.1
-        - type: DRAGON_BREATH
-          count: 50
-          offsetX: 0.5
-          offsetY: 0.5
-          offsetZ: 0.5
-          speed: 0.05
+      - type: TOTEM
+        count: 100
+        offsetX: 0.7
+        offsetY: 0.7
+        offsetZ: 0.7
+        speed: 0.1
+      - type: DRAGON_BREATH
+        count: 50
+        offsetX: 0.5
+        offsetY: 0.5
+        offsetZ: 0.5
+        speed: 0.05
       lightning: true
       broadcast:
         enabled: true
@@ -454,7 +1079,7 @@ panel:
       fireworks:
         enabled: true
         count: 3
-
+    
     raro:
       name: '&9&lRARO'
       sound:
@@ -463,23 +1088,23 @@ panel:
         volume: 1.0
         pitch: 1.2
       particles:
-        - type: ENCHANTMENT_TABLE
-          count: 50
-          offsetX: 0.5
-          offsetY: 0.3
-          offsetZ: 0.5
-          speed: 1.0
-        - type: END_ROD
-          count: 20
-          offsetX: 0.4
-          offsetY: 0.4
-          offsetZ: 0.4
-          speed: 0.1
+      - type: ENCHANTMENT_TABLE
+        count: 50
+        offsetX: 0.5
+        offsetY: 0.3
+        offsetZ: 0.5
+        speed: 1.0
+      - type: END_ROD
+        count: 20
+        offsetX: 0.4
+        offsetY: 0.4
+        offsetZ: 0.4
+        speed: 0.1
       broadcast:
         enabled: false
       fireworks:
         enabled: false
-
+    
     # Nuevos efectos
     epico:
       name: '&d&lÉPICO'
@@ -489,25 +1114,25 @@ panel:
         volume: 1.0
         pitch: 0.8
       particles:
-        - type: SPELL_WITCH
-          count: 40
-          offsetX: 0.5
-          offsetY: 1.0
-          offsetZ: 0.5
-          speed: 0.0
-        - type: PORTAL
-          count: 30
-          offsetX: 0.3
-          offsetY: 0.3
-          offsetZ: 0.3
-          speed: 0.05
+      - type: SPELL_WITCH
+        count: 40
+        offsetX: 0.5
+        offsetY: 1.0
+        offsetZ: 0.5
+        speed: 0.0
+      - type: PORTAL
+        count: 30
+        offsetX: 0.3
+        offsetY: 0.3
+        offsetZ: 0.3
+        speed: 0.05
       broadcast:
         enabled: true
         message: '&d⚡ &5¡{player} ha desbloqueado una recompensa ÉPICA! &d⚡'
       fireworks:
         enabled: true
         count: 1
-
+    
     mitico:
       name: '&5&lMÍTICO'
       sound:
@@ -516,25 +1141,25 @@ panel:
         volume: 0.7
         pitch: 1.0
       particles:
-        - type: SOUL_FIRE_FLAME
-          count: 60
-          offsetX: 0.6
-          offsetY: 0.6
-          offsetZ: 0.6
-          speed: 0.02
-        - type: SOUL
-          count: 25
-          offsetX: 0.5
-          offsetY: 1.5
-          offsetZ: 0.5
-          speed: 0.01
+      - type: SOUL_FIRE_FLAME
+        count: 60
+        offsetX: 0.6
+        offsetY: 0.6
+        offsetZ: 0.6
+        speed: 0.02
+      - type: SOUL
+        count: 25
+        offsetX: 0.5
+        offsetY: 1.5
+        offsetZ: 0.5
+        speed: 0.01
       broadcast:
         enabled: true
         message: '&8☠ &5¡{player} ha desbloqueado una recompensa MÍTICA! &8☠'
       fireworks:
         enabled: true
         count: 2
-
+    
     heroico:
       name: '&e&lHEROICO'
       sound:
@@ -543,24 +1168,24 @@ panel:
         volume: 1.0
         pitch: 0.5
       particles:
-        - type: FLAME
-          count: 50
-          offsetX: 0.5
-          offsetY: 0.5
-          offsetZ: 0.5
-          speed: 0.08
-        - type: VILLAGER_HAPPY
-          count: 30
-          offsetX: 0.4
-          offsetY: 0.4
-          offsetZ: 0.4
-          speed: 0.1
-        - type: GLOW
-          count: 40
-          offsetX: 0.5
-          offsetY: 1.0
-          offsetZ: 0.5
-          speed: 0.02
+      - type: FLAME
+        count: 50
+        offsetX: 0.5
+        offsetY: 0.5
+        offsetZ: 0.5
+        speed: 0.08
+      - type: VILLAGER_HAPPY
+        count: 30
+        offsetX: 0.4
+        offsetY: 0.4
+        offsetZ: 0.4
+        speed: 0.1
+      - type: GLOW
+        count: 40
+        offsetX: 0.5
+        offsetY: 1.0
+        offsetZ: 0.5
+        speed: 0.02
       broadcast:
         enabled: true
         message: '&e✯ &6¡{player} ha desbloqueado una recompensa HEROICA! &e✯'
@@ -588,15 +1213,15 @@ head_display:
     offset_z: 0.5
     # Líneas del holograma (se pueden usar placeholders: {player}, {streak}, {value})
     lines:
-      - '&f» &x&F&F&3&0&3&0&lEL MEJOR ASESINO &f«'
-      - '&f&f{player}'
-      - ''
-      - '&x&F&F&3&0&3&0{streak} asesinatos consecutivos 🗡'
-      - ''
-      - '&x&5&3&F&F&3&0Recompensa'
-      - '&x&5&3&F&F&3&0{value}$'
-      - ''
-      - '&x&F&F&8&6&1&2Matalo para ganar su recompensa'
+    - '&f» &x&F&F&3&0&3&0&lEL MEJOR ASESINO &f«'
+    - '&f&f{player}'
+    - ''
+    - '&x&F&F&3&0&3&0{streak} asesinatos consecutivos 🗡'
+    - ''
+    - '&x&5&3&F&F&3&0Recompensa'
+    - '&x&5&3&F&F&3&0{value}$'
+    - ''
+    - '&x&F&F&8&6&1&2Matalo para ganar su recompensa'
 
 # Valoración de la cabeza según la racha
 head_values:
@@ -612,8 +1237,8 @@ head_values:
   '10': 15000 # Valores especiales para ciertas rachas
   '20': 30000
   '30': 50000
-  '50': 100000
-  '100': 200000
+  '50': 10000
+  '100': 20000
 # Configuración de rankings
 rankings:
   update_interval: 300
@@ -627,47 +1252,48 @@ rankings:
       display_name: '&cTop Racha'
       limit: 10
   holograms:
-    holo_1746953014864:
+    holo_1752923947409:
       type: killstreak
       world: world
       x: -359
-      y: 205
+      y: 208
       z: 111
-    holo_1746953043419:
+    holo_1752923961519:
       type: trophies
       world: world
       x: -359
-      y: 205
+      y: 208
       z: 137
 # Letreros configurados se guardan automáticamente aquí
 
 # Configuración de cosméticos
 cosmetics:
   enabled: true # Activar/desactivar todo el sistema de cosméticos
-  debug: false # Activar logs de debug para cosméticos (útil para diagnóstico)
   menu:
     title: '&x&2&C&B&1&F&F&lC&x&2&B&B&4&F&F&lO&x&2&A&B&6&F&F&lS&x&2&9&B&9&F&F&lM&x&2&8&B&C&F&F&lE&x&2&6&B&E&F&F&lT&x&2&5&C&1&F&F&lI&x&2&4&C&4&F&F&lC&x&2&3&C&6&F&F&lO&x&2&2&C&9&F&F&lS'
     rows: 4
     # Configuración de las categorías
     categories:
       particle:
-        enabled: false
+        enabled: true
         item: BLAZE_POWDER
-        name: '&bPartículas'
+        name: '&x&F&9&3&2&F&F&lPAR&x&F&9&3&2&F&F&lTIC&x&F&9&3&2&F&F&lULA&x&F&9&3&2&F&F&lS'
         lore:
-          - '&7Haz clic para ver tus'
-          - '&7cosméticos de partículas'
-        position: 21
+        - '&7Informacion'
+        - ''
+        - '&f &7| &7En esta seccion podras elejir que particulas quieres'
+        - '&f &7| &7usar'
+        position: 22
       sound:
         enabled: true
         item: NOTE_BLOCK
         name: '&x&6&8&F&F&2&C&lE&x&6&4&F&F&3&3&lF&x&6&0&F&F&3&A&lE&x&5&C&F&F&4&0&lC&x&5&8&F&F&4&7&lT&x&5&3&F&F&4&E&lO&x&4&F&F&F&5&5&lS
           &x&4&7&F&F&6&2&lD&x&4&3&F&F&6&9&lE &x&3&B&F&F&7&6&lS&x&3&7&F&F&7&D&lO&x&3&2&F&F&8&4&lN&x&2&E&F&F&8&B&lI&x&2&A&F&F&9&1&lD&x&2&6&F&F&9&8&lO&x&2&2&F&F&9&F&lS'
         lore:
-          - '&7Informacion'
-          - ''
-          - '&f &7| &7En esta seccion podras elejir que sonido quieres'
-          - '&f &7| &7Al matar a un usuario'
+        - '&7Informacion'
+        - ''
+        - '&f &7| &7En esta seccion podras elejir que sonido quieres'
+        - '&f &7| &7Al matar a un usuario'
         position: 12
       kill:
         enabled: true
@@ -675,12 +1301,12 @@ cosmetics:
         name: '&x&F&F&1&2&2&B&lE&x&F&F&1&A&2&A&lF&x&F&F&2&2&2&A&lE&x&F&F&2&A&2&9&lC&x&F&F&3&2&2&9&lT&x&F&F&3&9&2&8&lO&x&F&F&4&1&2&8&lS
           &x&F&F&5&1&2&7&lD&x&F&F&5&9&2&6&lE &x&F&F&6&9&2&5&lM&x&F&F&7&1&2&4&lU&x&F&F&7&8&2&4&lE&x&F&F&8&0&2&3&lR&x&F&F&8&8&2&3&lT&x&F&F&9&0&2&2&lE'
         lore:
-          - '&7Informacion'
-          - ''
-          - '&f &7| &7En esta seccion podras elejir que efecto de asesinato quieres'
-          - '&f &7| &7Al matar a un usuario '
+        - '&7Informacion'
+        - ''
+        - '&f &7| &7En esta seccion podras elejir que efecto de asesinato quieres'
+        - '&f &7| &7Al matar a un usuario '
         position: 14
-
+    
     # Configuración del menú de categorías
     category_menu:
       title_format: '&b{category_name}'
@@ -689,156 +1315,182 @@ cosmetics:
         item: BARRIER
         name: '&cCerrar'
         lore:
-          - ''
-          - '&f &7| &7Regresar al menu principal'
+        - ''
+        - '&f &7| &7Regresar al menu principal'
         position: 0
       none_button:
         item: BARRIER
         name: '&cDesequipar'
         lore:
-          - ''
-          - '&f &7| &7No usar ningun efecto'
+        - ''
+        - '&f &7| &7No usar ningun efecto'
         position: 53
       item_format:
         unlocked:
           name: '&a{effect_name}'
           lore:
-            - ''
-            - '&f &7| &7Estado: &aDesbloqueado: ✓'
+          - ''
+          - '&f &7| &7Estado: &aDesbloqueado: ✓'
         locked:
           name: '&c{effect_name}'
           lore:
-            - '&7Informacion'
-            - ''
-            - '&f &7| &7Estado: &cBloqueado ❌'
-            - '&f &7| &7Requiere: &6{requirement} 🔥'
+          - '&7Informacion'
+          - ''
+          - '&f &7| &7Estado: &cBloqueado ❌'
+          - '&f &7| &7Requiere: &6{requirement} 🔥'
         selected:
           name: '&a{effect_name}'
           lore:
-            - '&7Informacion'
-            - ''
-            - '&a✓ Seleccionado'
-            - '&7Haz clic para deseleccionar'
-
+          - '&7Informacion'
+          - ''
+          - '&a✓ Seleccionado'
+          - '&7Haz clic para deseleccionar'
+      
       # Disposición de los items en el menú
       start_position: 18
       pattern:
-        - 18
-        - 19
-        - 20
-        - 21
-        - 22
-        - 23
-        - 24
-        - 25
-        - 26
-        - 27
-        - 28
-        - 29
-        - 30
-        - 31
-        - 32
-        - 33
-        - 34
-        - 35
-        - 36
-        - 37
-        - 38
-        - 39
-        - 40
-        - 41
-        - 42
-        - 43
-        - 44
-
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
+      - 26
+      - 27
+      - 28
+      - 29
+      - 30
+      - 31
+      - 32
+      - 33
+      - 34
+      - 35
+      - 36
+      - 37
+      - 38
+      - 39
+      - 40
+      - 41
+      - 42
+      - 43
+      - 44
+    
     # Decoración del menú
     decoration:
       enabled: true
       item: GRAY_STAINED_GLASS_PANE
       name: ' '
-
+  
   # Desbloqueos de cosméticos por rachas
   unlocks:
     streaks:
       '5':
         effects:
-          - particle_flame
-          - sound_levelup
-          - sound_elder
-          - kill_smoke
-          - sound_bell
-          - sound_dolphin_happy
-          - sound_cat_meow
-          - sound_puffer_inflate
+        - particle_water
+        - sound_levelup
+        - sound_elder
+        - kill_smoke
+        - sound_bell
+        - particle_water
+        - sound_dolphin_happy
+        - sound_cat_meow
+        - particle_ash
+        - particle_helix
+        - sound_puffer_inflate
       '10':
         effects:
-          - particle_heart
-          - sound_ender
-          - sound_goat
-          - kill_lightning
-          - sound_nether_portal
+        - particle_heart
+        - particle_ash
+        - particle_wax
+        - particle_enchant
+        - sound_ender
+        - particle_soul
+        - particle_wax
+        - particle_snow
+        - particle_soul
+        - sound_goat
+        - kill_lightning
+        - sound_nether_portal
       '15':
         effects:
-          - particle_portal
-          - sound_dragon
-          - kill_freeze
-          - sound_ravager
-          - sound_witch_laugh
-          - sound_villager_no
-          - sound_anvil_land
-          - sound_zombie_angry
-          - kill_explosion
+        - particle_portal
+        - sound_dragon
+        - kill_freeze
+        - particle_note
+        - sound_ravager
+        - particle_lava
+        - particle_flame
+        - particle_note
+        - sound_witch_laugh
+        - sound_villager_no
+        - sound_anvil_land
+        - sound_zombie_angry
+        - kill_explosion
       '20':
         effects:
-          - particle_totem
-          - sound_slime_squish
-          - sound_wither
-          - kill_firework
-          - sound_lightning
-          - sound_raid
-          - kill_snap
+        - particle_totem
+        - sound_slime_squish
+        - particle_trail
+        - particle_slime
+        - particle_snow
+        - sound_wither
+        - particle_dust
+        - kill_firework
+        - sound_lightning
+        - sound_raid
+        - particle_enchant
+        - kill_snap
       '25':
         effects:
-          - particle_circle
-          - sound_wolf
-          - kill_soul
-          - kill_totem
-          - sound_warden
-          - sound_ping_victory
+        - particle_circle
+        - sound_wolf
+        - kill_soul
+        - kill_totem
+        - particle_dust
+        - sound_warden
+        - particle_lava
+        - sound_ping_victory
+        - particle_helix
       '30':
         effects:
-          - particle_wings
-          - sound_blaze
-          - sound_anvil
-          - sound_fox
-          - musical_death
-          - kill_vortex
+        - particle_wings
+        - particle_orbit
+        - sound_blaze
+        - sound_anvil
+        - sound_fox
+        - kill_musical
+        - kill_vortex
       '40':
         effects:
-          - particle_crown
-          - sound_ghast
-          - kill_thunder
+        - particle_crown
+        - particle_trail
+        - particle_slime
+        - sound_ghast
+        - kill_thunder
       '50':
         effects:
-          - particle_aura
-          - sound_totem
-          - kill_meteor
-          - kill_blackhole
-          - kill_ghost
-          - lava_eruption
-          - phantom_strike
+        - particle_aura
+        - particle_orbit
+        - sound_totem
+        - kill_meteor
+        - kill_blackhole
+        - kill_ghost
+        - kill_lava
+        - kill_phantom
       '100':
         effects:
-          - bro_respeta
-          - thanos_snap
-          - ice_prison
-          - rainbow_explosion
-          - rocket_launch
-          - treasure_explosion
-
+        - kill_bro_respeta
+        - kill_thanos
+        - kill_ice_prison
+        - kill_rainbow
+        - kill_rocket
+        - kill_treasure
+  
   # Efectos personalizados (aparecerán en el menú)
   custom_effects:
-
+    
     ping_victory:
       type: sound
       name: '&a&lVictoria de Ping'
@@ -846,7 +1498,7 @@ cosmetics:
       sound: BLOCK_NOTE_BLOCK_PLING
       volume: 1.0
       pitch: 2.0
-
+    
     nether_portal:
       type: sound
       name: '&5&lPortal del Nether'
@@ -854,7 +1506,7 @@ cosmetics:
       sound: BLOCK_PORTAL_AMBIENT
       volume: 1.0
       pitch: 0.7
-
+    
     slime_squish:
       type: sound
       name: '&a&lSlime Aplastado'
@@ -862,7 +1514,7 @@ cosmetics:
       sound: ENTITY_SLIME_SQUISH
       volume: 1.0
       pitch: 0.8
-
+    
     dolphin_happy:
       type: sound
       name: '&b&lDelfín Feliz'
@@ -870,7 +1522,7 @@ cosmetics:
       sound: ENTITY_DOLPHIN_PLAY
       volume: 1.0
       pitch: 1.0
-
+    
     zombie_angry:
       type: sound
       name: '&2&lZombie Enfadado'
@@ -878,7 +1530,7 @@ cosmetics:
       sound: ENTITY_ZOMBIE_AMBIENT
       volume: 1.0
       pitch: 0.7
-
+    
     cat_meow:
       type: sound
       name: '&f&lMaullido'
@@ -886,7 +1538,7 @@ cosmetics:
       sound: ENTITY_CAT_PURREOW
       volume: 1.0
       pitch: 1.5
-
+    
     villager_no:
       type: sound
       name: '&6&lVillager Dice No'
@@ -894,7 +1546,7 @@ cosmetics:
       sound: ENTITY_VILLAGER_NO
       volume: 1.0
       pitch: 0.5
-
+    
     anvil_land:
       type: sound
       name: '&8&lYunque Caído'
@@ -902,7 +1554,7 @@ cosmetics:
       sound: BLOCK_ANVIL_LAND
       volume: 1.0
       pitch: 0.5
-
+    
     puffer_inflate:
       type: sound
       name: '&e&lPez Globo'
@@ -910,7 +1562,7 @@ cosmetics:
       sound: ENTITY_PUFFER_FISH_BLOW_UP
       volume: 1.0
       pitch: 1.0
-
+    
     witch_laugh:
       type: sound
       name: '&5&lRisa de Bruja'
@@ -918,7 +1570,7 @@ cosmetics:
       sound: ENTITY_WITCH_CELEBRATE
       volume: 1.0
       pitch: 1.0
-
+    
     rainbow:
       type: particle
       name: Arcoíris
@@ -930,7 +1582,7 @@ cosmetics:
       offset_z: 0.4
       speed: 0.02
       count: 15
-
+    
     thunder:
       type: sound
       name: Trueno Fuerte
@@ -938,82 +1590,82 @@ cosmetics:
       sound: ENTITY_LIGHTNING_BOLT_THUNDER
       volume: 1.2
       pitch: 0.8
-
+    
     bro_respeta:
       type: kill
       name: '&6&lBro Respeta'
       icon: ARMOR_STAND
       kill_effect: BRO_RESPETA
       description: Hace aparecer un holograma con el meme 'Bro Respeta' al matar
-
+    
     phantom_strike:
       type: kill
       name: '&b&lGolpe Fantasma'
       icon: PHANTOM_MEMBRANE
       kill_effect: PHANTOM_STRIKE
       description: Invoca fantasmas que atacan visualmente al objetivo
-
+    
     lava_eruption:
       type: kill
       name: '&c&lErupción de Lava'
       icon: LAVA_BUCKET
       kill_effect: LAVA_ERUPTION
       description: Causa una erupción de lava visual donde murió el enemigo
-
+    
     musical_death:
       type: kill
       name: '&d&lMuerte Musical'
       icon: JUKEBOX
       kill_effect: MUSICAL_DEATH
       description: Notas musicales salen disparadas al matar a un enemigo
-
+    
     void_prison:
       type: kill
       name: '&5&lPrisión del Vacío'
       icon: END_GATEWAY
       kill_effect: VOID_PRISON
       description: Encierra al enemigo en una cárcel del vacío antes de desaparecer
-
+    
     rainbow_explosion:
       type: kill
       name: '&c&lE&6&lx&e&lp&a&ll&b&lo&d&ls&5&li&c&ló&6&ln'
       icon: FIREWORK_STAR
       kill_effect: RAINBOW_EXPLOSION
       description: Una explosión de colores del arcoiris
-
+    
     thanos_snap:
       type: kill
       name: '&5Chasquido de Thanos'
       icon: DRAGON_BREATH
       kill_effect: THANOS_SNAP
       description: Desintegra al enemigo como en Infinity War
-
+    
     ice_prison:
       type: kill
       name: '&b&lPrisión de Hielo'
       icon: BLUE_ICE
       kill_effect: ICE_PRISON
       description: Congela al enemigo en un bloque de hielo
-
+    
     treasure_explosion:
       type: kill
       name: '&e&lExplosión de Tesoro'
       icon: GOLD_INGOT
       kill_effect: TREASURE_EXPLOSION
       description: Hace aparecer monedas y diamantes visuales al matar
-
+    
     rocket_launch:
       type: kill
       name: '&c&lLanzamiento Espacial'
       icon: FIREWORK_ROCKET
       kill_effect: ROCKET_LAUNCH
       description: El enemigo sale disparado hacia arriba como un cohete
-
+  
   # Opciones generales de cosméticos
   options:
     particles:
       enabled: true # Activar/desactivar sistema de partículas globalmente
-      visibility_range: 32 # Distancia máxima en bloques para ver partículas de otro jugador
+      visibility_range: 6 # Distancia máxima en bloques para ver partículas de otro jugador
 
 # Personalización de hologramas de ranking
 holograms_format:
@@ -1038,43 +1690,34 @@ holograms_format:
 excluded_regions:
   enabled: true
   regions:
-    - spawn
-    - coliseo
-    - eventos
-    - parkour
+  - spawn
+  - coliseo
+  - eventos
+  - parkour
   # Si usas WorldGuard, puedes especificar también flags personalizadas
   worldguard:
     enabled: true
     flags:
-      - nokenistreak
-      - nokenitrophies
+    - nokenistreak
+    - nokenitrophies
   message: '&c¡En esta región no se acumulan rachas ni trofeos!'
   region_ids:
-    - coliseo
+  - coliseo
 
 # Recompensas por rangos de rachas de kills
 streak_rewards:
   enabled: true
-  # Formato:
-  # - min_streak-max_streak: ['comando1 {player}', 'comando2 {player}']
   ranges:
-    "5-10":
-      - "give {player} diamond 1"
-      - "eco give {player} 50"
-      - "title {player} title {\"text\":\"¡Racha de 5!\",\"color\":\"gold\"}"
-    "11-20":
-      - "give {player} diamond 3"
-      - "eco give {player} 100"
-      - "title {player} title {\"text\":\"¡Racha de 10!\",\"color\":\"gold\"}"
-    "21-30":
-      - "give {player} diamond 5"
-      - "eco give {player} 250"
-      - "title {player} title {\"text\":\"¡Racha de 20!\",\"color\":\"gold\"}"
-    "31-50":
-      - "give {player} diamond_block 1"
-      - "eco give {player} 500"
-      - "title {player} title {\"text\":\"¡IMPARABLE!\",\"color\":\"red\"}"
-    "51-100":
-      - "give {player} netherite_ingot 1"
-      - "eco give {player} 1000"
-      - "title {player} title {\"text\":\"¡DOMINADOR!\",\"color\":\"dark_red\"}"
+    5-10:
+    - phoenixcrates giveKey op {player} 1
+    11-20:
+    - phoenixcrates giveKey op {player} 1
+    - phoenixcrates giveKey mitica {player} 1
+    21-30:
+    - phoenixcrates giveKey op {player} 2
+    - phoenixcrates giveKey mitica {player} 2
+    31-50:
+    - phoenixcrates giveKey legendaria {player} 1
+    51-100:
+    - phoenixcrates giveKey heroica {player} 1
+migrate_rewards: false
