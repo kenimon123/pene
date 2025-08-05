@@ -30,7 +30,7 @@ public class KillListener implements Listener {
         if (plugin.getPerformanceMonitor() != null) {
             plugin.getPerformanceMonitor().recordKillProcessed();
         }
-        
+
         Player victim = event.getEntity();
         Player killer = victim.getKiller();
 
@@ -66,41 +66,45 @@ public class KillListener implements Listener {
 
         // Actualizar la racha en caché y base de datos usando batch operation
         plugin.getCacheManager().updateKillStreak(killer.getUniqueId(), newStreak);
-        
+
+        // Crear copias finales para usar en lambdas
+        final Player finalKiller = killer;
+        final int finalNewStreak = newStreak;
+
         // Usar callback asíncrono para UI updates - no bloquea el hilo principal
         CompletableFuture.runAsync(() -> {
             // Notificar al jugador sobre la racha
-            if (newStreak == 1) {
+            if (finalNewStreak == 1) {
                 String startMessage = plugin.getConfigManager().getFormattedMessage("killstreak.start");
-                killer.sendMessage(startMessage);
+                finalKiller.sendMessage(startMessage);
             } else {
                 String updateMessage = plugin.getConfigManager().getFormattedMessage("killstreak.update");
-                updateMessage = updateMessage.replace("{streak}", String.valueOf(newStreak));
-                killer.sendMessage(updateMessage);
+                updateMessage = updateMessage.replace("{streak}", String.valueOf(finalNewStreak));
+                finalKiller.sendMessage(updateMessage);
             }
 
             // Si alcanzó un milestone de racha (configurable)
             int milestoneInterval = plugin.getConfigManager().getConfig().getInt("milestone_interval", 5);
-            if (milestoneInterval > 0 && newStreak % milestoneInterval == 0) {
+            if (milestoneInterval > 0 && finalNewStreak % milestoneInterval == 0) {
                 String milestoneMessage = plugin.getConfigManager().getFormattedMessage("killstreak.milestone");
-                milestoneMessage = milestoneMessage
-                        .replace("{player}", killer.getName())
-                        .replace("{streak}", String.valueOf(newStreak));
+                final String finalMilestoneMessage = milestoneMessage
+                        .replace("{player}", finalKiller.getName())
+                        .replace("{streak}", String.valueOf(finalNewStreak));
 
                 // Broadcast del milestone (ejecutar en main thread)
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    Bukkit.broadcastMessage(milestoneMessage);
+                    Bukkit.broadcastMessage(finalMilestoneMessage);
                 });
             }
 
             // Otorgar trofeos por el asesinato
-            grantTrophies(killer, newStreak);
+            grantTrophies(finalKiller, finalNewStreak);
 
             // Verificar desbloqueos de cosméticos
-            plugin.getCosmeticManager().checkStreakUnlocks(killer, newStreak);
+            plugin.getCosmeticManager().checkStreakUnlocks(finalKiller, finalNewStreak);
 
             // Actualizar lista de jugadores top streak si es necesario
-            plugin.getTopStreakHeadManager().checkStreakUpdate(killer.getUniqueId(), newStreak);
+            plugin.getTopStreakHeadManager().checkStreakUpdate(finalKiller.getUniqueId(), finalNewStreak);
         });
 
         // CORREGIDO: Ejecutar efectos de kill y sonidos inmediatamente (no asincrónicamente)
@@ -138,12 +142,12 @@ public class KillListener implements Listener {
                 // Verificar si la racha está en el rango
                 if (streak >= minStreak && streak <= maxStreak) {
                     // Verificar si esta racha exacta ya fue recompensada
-                    String rewardId = "streak_" + streak;
+                    final String rewardId = "streak_" + streak;
                     if (!plugin.getRewardManager().hasClaimedReward(player.getUniqueId(), rewardId)) {
                         // Ejecutar comandos de recompensa
                         List<String> commands = rewardsSection.getStringList(rangeKey);
                         for (String cmd : commands) {
-                            String processedCmd = cmd.replace("{player}", player.getName());
+                            final String processedCmd = cmd.replace("{player}", player.getName());
                             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCmd);
                         }
 
@@ -151,10 +155,11 @@ public class KillListener implements Listener {
                         plugin.getRewardManager().claimReward(player.getUniqueId(), rewardId);
 
                         // Mostrar mensaje de recompensa
-                        String message = plugin.getConfigManager().getFormattedMessage(
-                                "streak_rewards.received",
-                                "&a¡Has recibido una recompensa por alcanzar una racha de &6{streak}&a kills!");
-                        message = message.replace("{streak}", String.valueOf(streak));
+                        final String message = plugin.getConfigManager().getFormattedMessage(
+                                        "streak_rewards.received",
+                                        "&a¡Has recibido una recompensa por alcanzar una racha de &6{streak}&a kills!")
+                                .replace("{streak}", String.valueOf(streak));
+
                         player.sendMessage(message);
 
                         // Efecto de sonido
@@ -181,18 +186,22 @@ public class KillListener implements Listener {
 
         // Actualizar la racha a 0 usando cache manager optimizado
         plugin.getCacheManager().updateKillStreak(player.getUniqueId(), 0);
-        
+
+        // Crear una copia final del jugador para usar en lambdas
+        final Player finalPlayer = player;
+        final boolean finalWithPenalty = withPenalty;
+
         // Procesar penalización y notificaciones asíncronamente
         CompletableFuture.runAsync(() -> {
             // Aplicar penalización si corresponde
-            if (withPenalty) {
-                applyStreakLossPenalty(player);
+            if (finalWithPenalty) {
+                applyStreakLossPenalty(finalPlayer);
             }
 
             // Notificar pérdida de racha (en main thread)
             Bukkit.getScheduler().runTask(plugin, () -> {
                 String lostMessage = plugin.getConfigManager().getFormattedMessage("killstreak.lost");
-                player.sendMessage(lostMessage);
+                finalPlayer.sendMessage(lostMessage);
             });
         });
     }
@@ -203,7 +212,7 @@ public class KillListener implements Listener {
      */
     private void applyStreakLossPenalty(Player player) {
         int penalty = plugin.getConfigManager().getConfig().getInt("streak_loss_penalty", 50);
-        String currency = plugin.getConfigManager().getConfig().getString("currency_name", "trofeos");
+        final String currency = plugin.getConfigManager().getConfig().getString("currency_name", "trofeos");
 
         // Si no hay penalización configurada, no hacer nada
         if (penalty <= 0) return;
@@ -219,15 +228,19 @@ public class KillListener implements Listener {
         // Si no hay trofeos para quitar, no hacer nada
         if (penalty <= 0) return;
 
+        // Crear copia final de la penalidad para usar en posibles lambdas
+        final int finalPenalty = penalty;
+
         // Aplicar la penalización
-        int newTrophies = currentTrophies - penalty;
+        int newTrophies = currentTrophies - finalPenalty;
         plugin.getCacheManager().setCachedTrophies(player.getUniqueId(), newTrophies);
         plugin.getDatabaseManager().setTrophies(player.getUniqueId(), newTrophies);
 
         // Notificar al jugador
-        String message = plugin.getConfigManager().getFormattedMessage("killstreak.max");
-        message = message.replace("%penalty%", String.valueOf(penalty))
+        final String message = plugin.getConfigManager().getFormattedMessage("killstreak.max")
+                .replace("%penalty%", String.valueOf(finalPenalty))
                 .replace("%currency%", currency);
+
         player.sendMessage(message);
     }
 
@@ -245,7 +258,7 @@ public class KillListener implements Listener {
         int maxBonus = plugin.getConfigManager().getConfig().getInt("max_trophy_bonus", 5);
 
         // Si hay bonus específico para esta racha en la config, usarlo
-        String streakStr = String.valueOf(streak);
+        final String streakStr = String.valueOf(streak);
         if (plugin.getConfigManager().getConfig().contains("trophy_increase_per_kill." + streakStr)) {
             bonus = plugin.getConfigManager().getConfig().getInt("trophy_increase_per_kill." + streakStr);
         } else {
