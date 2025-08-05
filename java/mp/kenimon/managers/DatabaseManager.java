@@ -62,6 +62,11 @@ public class DatabaseManager {
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             processBatchUpdates();
         }, 100L, 100L); // Cada 5 segundos
+        
+        // Programar health check del pool cada 2 minutos
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+            connectionPool.healthCheck();
+        }, 2400L, 2400L); // Cada 2 minutos
     }
 
     /**
@@ -126,6 +131,16 @@ public class DatabaseManager {
      */
     public ConnectionPool getConnectionPool() {
         return connectionPool;
+    }
+    
+    /**
+     * Obtiene estadísticas del pool para debugging
+     */
+    public String getPoolStats() {
+        if (connectionPool != null) {
+            return connectionPool.getStats().toString();
+        }
+        return "Pool no disponible";
     }
 
     /**
