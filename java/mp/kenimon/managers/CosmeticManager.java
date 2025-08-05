@@ -140,23 +140,23 @@ public class CosmeticManager {
         registerEffect(new KillEffect("kill_blackhole", "Agujero Negro", Material.BLACK_CONCRETE, KillEffect.KillEffectType.BLACKHOLE, plugin));
         registerEffect(new KillEffect("kill_freeze", "Congelación", Material.BLUE_ICE, KillEffect.KillEffectType.FREEZE, plugin));
 
-        // Efectos de kill existentes
-        registerEffect(new KillEffect("kill_bro_respeta", "Bro Respeta", Material.ARMOR_STAND, KillEffect.KillEffectType.BRO_RESPETA, plugin));
-        registerEffect(new KillEffect("kill_phantom", "Ataque Fantasma", Material.PHANTOM_MEMBRANE, KillEffect.KillEffectType.PHANTOM_STRIKE, plugin));
-        registerEffect(new KillEffect("kill_lava", "Erupción de Lava", Material.LAVA_BUCKET, KillEffect.KillEffectType.LAVA_ERUPTION, plugin));
-        registerEffect(new KillEffect("kill_musical", "Muerte Musical", Material.JUKEBOX, KillEffect.KillEffectType.MUSICAL_DEATH, plugin));
+        // Efectos de kill existentes - NOMBRES CORREGIDOS PARA COINCIDIR CON CONFIG
+        registerEffect(new KillEffect("bro_respeta", "Bro Respeta", Material.ARMOR_STAND, KillEffect.KillEffectType.BRO_RESPETA, plugin));
+        registerEffect(new KillEffect("phantom_strike", "Ataque Fantasma", Material.PHANTOM_MEMBRANE, KillEffect.KillEffectType.PHANTOM_STRIKE, plugin));
+        registerEffect(new KillEffect("lava_eruption", "Erupción de Lava", Material.LAVA_BUCKET, KillEffect.KillEffectType.LAVA_ERUPTION, plugin));
+        registerEffect(new KillEffect("musical_death", "Muerte Musical", Material.JUKEBOX, KillEffect.KillEffectType.MUSICAL_DEATH, plugin));
         registerEffect(new KillEffect("kill_thunder", "Tormenta", Material.TRIDENT, KillEffect.KillEffectType.THUNDER_STORM, plugin));
         registerEffect(new KillEffect("kill_meteor", "Meteoro", Material.MAGMA_BLOCK, KillEffect.KillEffectType.METEOR, plugin));
         registerEffect(new KillEffect("kill_ghost", "Fantasma", Material.SKELETON_SKULL, KillEffect.KillEffectType.GHOST, plugin));
         registerEffect(new KillEffect("kill_soul", "Robo de Alma", Material.SOUL_LANTERN, KillEffect.KillEffectType.SOUL_STEAL, plugin));
 
-        // Nuevos efectos de muerte
-        registerEffect(new KillEffect("kill_void", "Prisión del Vacío", Material.END_GATEWAY, KillEffect.KillEffectType.VOID_PRISON, plugin));
-        registerEffect(new KillEffect("kill_rainbow", "Explosión Arcoíris", Material.FIREWORK_STAR, KillEffect.KillEffectType.RAINBOW_EXPLOSION, plugin));
-        registerEffect(new KillEffect("kill_thanos", "Chasquido de Thanos", Material.DRAGON_BREATH, KillEffect.KillEffectType.THANOS_SNAP, plugin));
-        registerEffect(new KillEffect("kill_ice_prison", "Prisión de Hielo", Material.BLUE_ICE, KillEffect.KillEffectType.ICE_PRISON, plugin));
-        registerEffect(new KillEffect("kill_treasure", "Explosión de Tesoro", Material.GOLD_INGOT, KillEffect.KillEffectType.TREASURE_EXPLOSION, plugin));
-        registerEffect(new KillEffect("kill_rocket", "Lanzamiento Espacial", Material.FIREWORK_ROCKET, KillEffect.KillEffectType.ROCKET_LAUNCH, plugin));
+        // Nuevos efectos de muerte - NOMBRES CORREGIDOS PARA COINCIDIR CON CONFIG
+        registerEffect(new KillEffect("void_prison", "Prisión del Vacío", Material.END_GATEWAY, KillEffect.KillEffectType.VOID_PRISON, plugin));
+        registerEffect(new KillEffect("rainbow_explosion", "Explosión Arcoíris", Material.FIREWORK_STAR, KillEffect.KillEffectType.RAINBOW_EXPLOSION, plugin));
+        registerEffect(new KillEffect("thanos_snap", "Chasquido de Thanos", Material.DRAGON_BREATH, KillEffect.KillEffectType.THANOS_SNAP, plugin));
+        registerEffect(new KillEffect("ice_prison", "Prisión de Hielo", Material.BLUE_ICE, KillEffect.KillEffectType.ICE_PRISON, plugin));
+        registerEffect(new KillEffect("treasure_explosion", "Explosión de Tesoro", Material.GOLD_INGOT, KillEffect.KillEffectType.TREASURE_EXPLOSION, plugin));
+        registerEffect(new KillEffect("rocket_launch", "Lanzamiento Espacial", Material.FIREWORK_ROCKET, KillEffect.KillEffectType.ROCKET_LAUNCH, plugin));
         registerEffect(new KillEffect("kill_snap", "Desaparición", Material.GLOWSTONE_DUST, KillEffect.KillEffectType.SNAP_VANISH, plugin));
 
         registerAdditionalSoundEffects();
@@ -788,15 +788,40 @@ public class CosmeticManager {
 
     /**
      * Procesa un evento de asesinato para aplicar efectos de kill y sonido
+     * VERSIÓN CORREGIDA CON LOGGING
      */
     public void handleKillEvent(Player killer, Player victim) {
+        if (killer == null || victim == null) {
+            plugin.getLogger().warning("handleKillEvent llamado con killer o victim null");
+            return;
+        }
+
+        // NUEVO: Log para debugging
+        if (plugin.getConfigManager().getConfig().getBoolean("cosmetics.debug", false)) {
+            plugin.getLogger().info("Procesando kill event: " + killer.getName() + " mató a " + victim.getName());
+        }
+
         // Verificar y aplicar efecto de kill seleccionado
         String killEffectId = getSelectedEffect(killer.getUniqueId(), "kill");
         if (killEffectId != null) {
             CosmeticEffect effect = getEffectById(killEffectId);
             if (effect instanceof KillEffect) {
-                KillEffect killEffect = (KillEffect) effect;
-                killEffect.play(victim, killer);
+                try {
+                    KillEffect killEffect = (KillEffect) effect;
+                    killEffect.play(victim, killer);
+                    
+                    if (plugin.getConfigManager().getConfig().getBoolean("cosmetics.debug", false)) {
+                        plugin.getLogger().info("Ejecutado efecto de kill: " + killEffectId + " para " + killer.getName());
+                    }
+                } catch (Exception e) {
+                    plugin.getLogger().warning("Error ejecutando efecto de kill " + killEffectId + ": " + e.getMessage());
+                }
+            } else {
+                plugin.getLogger().warning("Efecto de kill " + killEffectId + " no es una instancia de KillEffect");
+            }
+        } else {
+            if (plugin.getConfigManager().getConfig().getBoolean("cosmetics.debug", false)) {
+                plugin.getLogger().info("No hay efecto de kill seleccionado para " + killer.getName());
             }
         }
 
@@ -805,8 +830,22 @@ public class CosmeticManager {
         if (soundEffectId != null) {
             CosmeticEffect effect = getEffectById(soundEffectId);
             if (effect instanceof SoundEffect) {
-                SoundEffect soundEffect = (SoundEffect) effect;
-                soundEffect.playOnKill(killer);
+                try {
+                    SoundEffect soundEffect = (SoundEffect) effect;
+                    soundEffect.playOnKill(killer);
+                    
+                    if (plugin.getConfigManager().getConfig().getBoolean("cosmetics.debug", false)) {
+                        plugin.getLogger().info("Ejecutado efecto de sonido: " + soundEffectId + " para " + killer.getName());
+                    }
+                } catch (Exception e) {
+                    plugin.getLogger().warning("Error ejecutando efecto de sonido " + soundEffectId + ": " + e.getMessage());
+                }
+            } else {
+                plugin.getLogger().warning("Efecto de sonido " + soundEffectId + " no es una instancia de SoundEffect");
+            }
+        } else {
+            if (plugin.getConfigManager().getConfig().getBoolean("cosmetics.debug", false)) {
+                plugin.getLogger().info("No hay efecto de sonido seleccionado para " + killer.getName());
             }
         }
     }
