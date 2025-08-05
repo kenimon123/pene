@@ -24,8 +24,8 @@ public class ConnectionPool {
     private volatile boolean shutdown = false;
     
     // Configuración optimizada para SQLite
-    private static final int DEFAULT_POOL_SIZE = 1; // SQLite funciona mejor con una sola conexión
-    private static final int CONNECTION_TIMEOUT = 10; // segundos
+    private static final int DEFAULT_POOL_SIZE = 3; // Aumentado para mejor concurrencia
+    private static final int CONNECTION_TIMEOUT = 5; // Reducido a 5 segundos para evitar bloqueos largos
     
     public ConnectionPool(Kenicompetitivo plugin, String connectionUrl) {
         this(plugin, connectionUrl, DEFAULT_POOL_SIZE);
@@ -87,7 +87,7 @@ public class ConnectionPool {
                     stmt.execute("PRAGMA synchronous = NORMAL");  // Balance entre seguridad y rendimiento
                     stmt.execute("PRAGMA cache_size = 10000");    // Cache de 10MB aproximadamente
                     stmt.execute("PRAGMA temp_store = MEMORY");   // Tablas temporales en memoria
-                    stmt.execute("PRAGMA busy_timeout = 30000");  // Timeout de 30 segundos
+                    stmt.execute("PRAGMA busy_timeout = 5000");   // Timeout de 5 segundos (coordinado con pool timeout)
                     stmt.execute("PRAGMA journal_mode = WAL");    // Modo WAL para mejor concurrencia
                 } catch (SQLException pragmaEx) {
                     plugin.getLogger().warning("Error configurando PRAGMAs SQLite: " + pragmaEx.getMessage());
@@ -151,7 +151,9 @@ public class ConnectionPool {
             Connection conn = pool.poll(CONNECTION_TIMEOUT, TimeUnit.SECONDS);
             
             if (conn == null) {
-                plugin.getLogger().warning("Timeout obteniendo conexión del pool después de " + CONNECTION_TIMEOUT + " segundos");
+                // Agregar estadísticas del pool para debugging
+                PoolStats stats = getStats();
+                plugin.getLogger().warning("Timeout obteniendo conexión del pool después de " + CONNECTION_TIMEOUT + " segundos. " + stats.toString());
                 // Intentar crear una nueva conexión como último recurso
                 return createConnection();
             }
@@ -252,5 +254,56 @@ public class ConnectionPool {
             return String.format("Pool Stats - Max: %d, Available: %d, Active: %d", 
                 maxConnections, availableConnections, activeConnections);
         }
+    }
+    
+    /**
+     * Verifica la salud del pool y limpia conexiones inválidas
+     */
+    public void healthCheck() {
+        if (shutdown) return;
+        
+        try {
+            int badConnections = 0;
+            int checkedConnections = 0;
+            
+            // Verificar conexiones disponibles en el pool
+            Connection[] connections = pool.toArray(new Connection[0]);
+            for (Connection conn : connections) {
+                checkedConnections++;
+                try {
+                    if (conn.isClosed() || !conn.isValid(1)) {
+                        pool.remove(conn);
+                        badConnections++;
+                        try {
+                            conn.close();
+                        } catch (SQLException ignored) {}
+                    }
+                } catch (SQLException e) {
+                    pool.remove(conn);
+                    badConnections++;
+                    try {
+                        conn.close();
+                    } catch (SQLException ignored) {}
+                }
+            }
+            
+            // Rellenar el pool si es necesario
+            while (pool.size() < maxConnections) {
+                Connection newConn = createConnection();
+                if (newConn != null) {
+                    pool.offer(newConn);
+                } else {
+                    break; // No se pudo crear más conexiones
+                }
+            }
+            
+            if (badConnections > 0) {
+                plugin.getLogger().info("Health check: Removed " + badConnections + " invalid connections, checked " + checkedConnections + " total");
+            }
+            
+        } catch (Exception e) {
+            plugin.getLogger().warning("Error durante health check del pool: " + e.getMessage());
+        }
+    }
     }
 }

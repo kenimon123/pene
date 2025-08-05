@@ -927,37 +927,39 @@ public class CosmeticManager {
 
     /**
      * Verifica y desbloquea cosméticos basados en la racha de kills
-     * VERSIÓN CORREGIDA
+     * VERSIÓN CORREGIDA - ASÍNCRONA
      */
     public void checkStreakUnlocks(Player player, int streak) {
-        FileConfiguration config = plugin.getConfigManager().getConfig();
-        ConfigurationSection streaksSection = config.getConfigurationSection("cosmetics.unlocks.streaks");
+        // Ejecutar asíncronamente para no bloquear el hilo principal
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            FileConfiguration config = plugin.getConfigManager().getConfig();
+            ConfigurationSection streaksSection = config.getConfigurationSection("cosmetics.unlocks.streaks");
 
-        if (streaksSection == null) {
-            plugin.getLogger().warning("No se encontró la sección cosmetics.unlocks.streaks en la configuración");
-            return;
-        }
+            if (streaksSection == null) {
+                plugin.getLogger().warning("No se encontró la sección cosmetics.unlocks.streaks en la configuración");
+                return;
+            }
 
-        // DEBUG: Imprimir información de racha
+            for (String streakKey : streaksSection.getKeys(false)) {
+                try {
+                    int streakThreshold = Integer.parseInt(streakKey);
 
-        for (String streakKey : streaksSection.getKeys(false)) {
-            try {
-                int streakThreshold = Integer.parseInt(streakKey);
+                    // IMPORTANTE: Las rachas deben desbloquearse cuando se alcanzan o superan
+                    if (streak >= streakThreshold) {
+                        List<String> effects = config.getStringList("cosmetics.unlocks.streaks." + streakKey + ".effects");
 
-                // IMPORTANTE: Las rachas deben desbloquearse cuando se alcanzan o superan
-                if (streak >= streakThreshold) {
-                    List<String> effects = config.getStringList("cosmetics.unlocks.streaks." + streakKey + ".effects");
-
-                    for (String effectId : effects) {
-                        if (!hasUnlockedEffect(player.getUniqueId(), effectId) && effectExists(effectId)) {
-                            unlockEffect(player.getUniqueId(), effectId);
+                        for (String effectId : effects) {
+                            if (!hasUnlockedEffect(player.getUniqueId(), effectId) && effectExists(effectId)) {
+                                unlockEffect(player.getUniqueId(), effectId);
+                            }
                         }
                     }
+                } catch (NumberFormatException e) {
+                    plugin.getLogger().warning("Valor de racha inválido en la configuración: " + streakKey);
                 }
-            } catch (NumberFormatException e) {
-                plugin.getLogger().warning("Valor de racha inválido en la configuración: " + streakKey);
             }
-        }
+        });
+    }
     }
 
     /**
