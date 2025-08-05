@@ -118,60 +118,73 @@ public class RankingManager {
         List<RankingEntry> rankings = new ArrayList<>();
 
         try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+            
             // MODIFICADO: Para el tipo killstreak, usar kill_streak
             String columnToUse = type.equals("killstreak") ? "kill_streak" : dbColumn;
+            
+            String sql = buildRankingQuery(type, dbColumn, columnToUse, order, limit);
+            
+            try (PreparedStatement stmt = conn.prepareStatement(sql);
+                 ResultSet rs = stmt.executeQuery()) {
 
-            // Construir la consulta SQL
-            String sql;
-            if (type.equals("killstreak")) {
-                // CRÍTICO: Incluir también rachas de 1 kill
-                sql = "SELECT uuid, " + columnToUse + " FROM players WHERE " + columnToUse + " > 0 ORDER BY " + columnToUse + " " + order + " LIMIT " + limit;
-            } else {
-                sql = "SELECT uuid, " + dbColumn + " FROM players ORDER BY " + dbColumn + " " + order + " LIMIT " + limit;
-            }
+                int position = 1;
+                while (rs.next()) {
+                    try {
+                        UUID uuid = UUID.fromString(rs.getString("uuid"));
+                        int value = rs.getInt(columnToUse);
 
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
+                        // IMPORTANTE: Solo incluir jugadores con valores positivos
+                        if (value > 0) {
+                            OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+                            String name = player.getName();
+                            if (name == null) name = "Desconocido";
 
-            int position = 1;
-            while (rs.next()) {
-                UUID uuid = UUID.fromString(rs.getString("uuid"));
-                int value;
-
-                if (type.equals("killstreak")) {
-                    value = rs.getInt(columnToUse);
-                } else {
-                    value = rs.getInt(dbColumn);
+                            RankingEntry entry = new RankingEntry(position, uuid, name, value);
+                            rankings.add(entry);
+                            position++;
+                        }
+                    } catch (IllegalArgumentException e) {
+                        // UUID inválido, continuar con el siguiente
+                        plugin.getLogger().warning("UUID inválido en ranking: " + rs.getString("uuid"));
+                    }
                 }
 
-                // IMPORTANTE: Solo incluir jugadores con valores positivos
-                if (value > 0) {
-                    OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-                    String name = player.getName();
-                    if (name == null) name = "Desconocido";
-
-                    RankingEntry entry = new RankingEntry(position, uuid, name, value);
-                    rankings.add(entry);
-                    position++;
-                }
-            }
-
-            rs.close();
-            stmt.close();
-
-            // Actualizar caché
-            cachedRankings.put(type, rankings);
-
-            // IMPORTANTE: Actualizar hologramas inmediatamente después de actualizar ranking
-            if (type.equals("killstreak")) {
-                updateHolograms();
+                // Actualizar caché
+                cachedRankings.put(type, rankings);
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            plugin.getLogger().warning("Error actualizando ranking " + type + ": " + e.getMessage());
+        }
+        
+        // CRÍTICO: Mover updateHolograms fuera del try-with-resources 
+        // y hacerlo asíncrono para no bloquear conexiones
+        if (type.equals("killstreak")) {
+            Bukkit.getScheduler().runTask(plugin, this::updateHolograms);
         }
     }
 
+    /**
+     * Versión asíncrona de updateRanking para evitar bloqueos del hilo principal
+     */
+    public void updateRankingAsync(String type, String displayName, String dbColumn, String order) {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            updateRanking(type, displayName, dbColumn, order);
+        });
+    }
+    
+    /**
+     * Construye la consulta SQL para el ranking optimizada
+     */
+    private String buildRankingQuery(String type, String dbColumn, String columnToUse, String order, int limit) {
+        if (type.equals("killstreak")) {
+            // CRÍTICO: Incluir también rachas de 1 kill, usar índice optimizado
+            return "SELECT uuid, " + columnToUse + " FROM players WHERE " + columnToUse + " > 0 ORDER BY " + columnToUse + " " + order + " LIMIT " + limit;
+        } else {
+            return "SELECT uuid, " + dbColumn + " FROM players ORDER BY " + dbColumn + " " + order + " LIMIT " + limit;
+        }
+    }
+    
     /**
      * Obtiene un ranking específico desde la caché
      */

@@ -338,10 +338,14 @@ public class KenicompetitivoCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Actualizar información de jugador top si corresponde
+        // Actualizar información de jugador top si corresponde (asíncrono)
         if (target != null && target.isOnline()) {
             plugin.getTopStreakHeadManager().checkStreakUpdate(targetUUID, newStreak);
-            plugin.getCosmeticManager().checkStreakUnlocks(target, newStreak);
+            
+            // Hacer la verificación de cosméticos asíncrona también
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                plugin.getCosmeticManager().checkStreakUnlocks(target, newStreak);
+            });
         }
 
         // Mensaje de confirmación
@@ -362,9 +366,15 @@ public class KenicompetitivoCommand implements CommandExecutor, TabCompleter {
             target.sendMessage(message);
         }
 
-        // Forzar actualización de rankings
-        plugin.getRankingManager().updateRanking("killstreak", "Racha", "kill_streak", "DESC");
-        plugin.getRankingManager().updateAllDisplays();
+        // CRÍTICO: Mover actualización de rankings a asíncrono para no bloquear el servidor
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            plugin.getRankingManager().updateRanking("killstreak", "Racha", "kill_streak", "DESC");
+            
+            // Programar actualización de displays en el hilo principal
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                plugin.getRankingManager().updateAllDisplays();
+            });
+        });
     }
 
     /**
@@ -438,6 +448,14 @@ public class KenicompetitivoCommand implements CommandExecutor, TabCompleter {
     private void handleDebugCommand(CommandSender sender, String[] args) {
         sender.sendMessage(ChatColor.YELLOW + "=== Kenicompetitivo Debug ===");
 
+        // NUEVO: Información del pool de conexiones
+        try {
+            String poolStats = plugin.getDatabaseManager().getPoolStats();
+            sender.sendMessage(ChatColor.YELLOW + "Estado del pool DB: " + ChatColor.WHITE + poolStats);
+        } catch (Exception e) {
+            sender.sendMessage(ChatColor.RED + "Error obteniendo stats del pool: " + e.getMessage());
+        }
+
         // Información de la base de datos
         try {
             int playerCount = 0;
@@ -448,18 +466,32 @@ public class KenicompetitivoCommand implements CommandExecutor, TabCompleter {
             }
             sender.sendMessage(ChatColor.YELLOW + "Jugadores online: " + ChatColor.WHITE + playerCount);
 
-            // Jugador con mayor racha
-            UUID topPlayerUUID = plugin.getTopStreakHeadManager().getCurrentTopPlayerUUID();
-            if (topPlayerUUID != null) {
-                OfflinePlayer topPlayer = Bukkit.getOfflinePlayer(topPlayerUUID);
-                int topStreak = plugin.getDatabaseManager().getKillStreak(topPlayerUUID);
-                sender.sendMessage(ChatColor.YELLOW + "Jugador con mayor racha: " +
-                        ChatColor.WHITE + (topPlayer.getName() != null ? topPlayer.getName() : "Desconocido") +
-                        ChatColor.GRAY + " (" + topStreak + " kills)");
-            } else {
-                sender.sendMessage(ChatColor.YELLOW + "Jugador con mayor racha: " +
-                        ChatColor.GRAY + "Ninguno");
-            }
+            // Jugador con mayor racha (hacerlo asíncrono para no bloquear)
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    UUID topPlayerUUID = plugin.getTopStreakHeadManager().getCurrentTopPlayerUUID();
+                    if (topPlayerUUID != null) {
+                        OfflinePlayer topPlayer = Bukkit.getOfflinePlayer(topPlayerUUID);
+                        int topStreak = plugin.getDatabaseManager().getKillStreak(topPlayerUUID);
+                        
+                        // Enviar resultado en el hilo principal
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            sender.sendMessage(ChatColor.YELLOW + "Jugador con mayor racha: " +
+                                    ChatColor.WHITE + (topPlayer.getName() != null ? topPlayer.getName() : "Desconocido") +
+                                    ChatColor.GRAY + " (" + topStreak + " kills)");
+                        });
+                    } else {
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            sender.sendMessage(ChatColor.YELLOW + "Jugador con mayor racha: " +
+                                    ChatColor.GRAY + "Ninguno");
+                        });
+                    }
+                } catch (Exception e) {
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        sender.sendMessage(ChatColor.RED + "Error obteniendo top player: " + e.getMessage());
+                    });
+                }
+            });
 
             // Estado de WorldGuard
             sender.sendMessage(ChatColor.YELLOW + "WorldGuard integración: " +
@@ -494,14 +526,29 @@ public class KenicompetitivoCommand implements CommandExecutor, TabCompleter {
         String action = args[1].toLowerCase();
 
         if (action.equals("update")) {
-            // Forzar actualización de rankings y hologramas
-            plugin.getRankingManager().updateAllRankings();
-            plugin.getRankingManager().updateAllDisplays();
-
-            // También actualizar cabeza del jugador top
-            plugin.getTopStreakHeadManager().forceUpdate();
-
-            sender.sendMessage(ChatColor.GREEN + "Hologramas actualizados correctamente.");
+            // Forzar actualización de rankings y hologramas (asíncrono)
+            sender.sendMessage(ChatColor.YELLOW + "Iniciando actualización asíncrona de hologramas...");
+            
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    plugin.getRankingManager().updateAllRankings();
+                    
+                    // Actualizar displays en el hilo principal
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        plugin.getRankingManager().updateAllDisplays();
+                        sender.sendMessage(ChatColor.GREEN + "Hologramas actualizados correctamente.");
+                    });
+                    
+                    // También actualizar cabeza del jugador top
+                    plugin.getTopStreakHeadManager().forceUpdate();
+                    
+                } catch (Exception e) {
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        sender.sendMessage(ChatColor.RED + "Error actualizando hologramas: " + e.getMessage());
+                    });
+                }
+            });
+            
         } else if (action.equals("info")) {
             // Mostrar información sobre hologramas configurados
             sender.sendMessage(ChatColor.YELLOW + "=== Información de Hologramas ===");

@@ -2,14 +2,18 @@
 
 # Configuración de rendimiento de la base de datos
 database:
-  # Tamaño del pool de conexiones (aumentado a 3 para mejor concurrencia con SQLite)
-  pool_size: 3
+  # Tamaño del pool de conexiones (REDUCIDO a 2 para SQLite y evitar timeouts)
+  pool_size: 2
   # Habilitar logs de debug para operaciones de DB
   debug: false
   # Intervalo para procesar actualizaciones batch (en ticks, 20 = 1 segundo)
   batch_process_interval: 100
   # Cantidad mínima de updates para trigger batch processing
   batch_size_threshold: 15
+  # NUEVO: Configuraciones para prevenir timeouts
+  connection_timeout: 10  # Timeout en segundos para obtener conexión del pool
+  max_retries: 3         # Máximo intentos de reconexión
+  leak_detection: true   # Habilitar detección automática de connection leaks
 
 # Configuración de cache para optimizar rendimiento  
 cache:

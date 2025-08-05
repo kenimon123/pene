@@ -25,7 +25,8 @@ public class ConnectionPool {
     
     // Configuración optimizada para SQLite
     private static final int DEFAULT_POOL_SIZE = 3; // Aumentado para mejor concurrencia
-    private static final int CONNECTION_TIMEOUT = 5; // Reducido a 5 segundos para evitar bloqueos largos
+    private static final int CONNECTION_TIMEOUT = 10; // Aumentado a 10 segundos para reducir timeouts
+    private static final int MAX_RETRY_ATTEMPTS = 2; // Máximo intentos para obtener conexión
     
     public ConnectionPool(Kenicompetitivo plugin, String connectionUrl) {
         this(plugin, connectionUrl, DEFAULT_POOL_SIZE);
@@ -138,7 +139,7 @@ public class ConnectionPool {
     }
     
     /**
-     * Obtiene una conexión del pool
+     * Obtiene una conexión del pool con manejo mejorado de timeouts
      * @return Connection o null si no está disponible
      */
     public Connection getConnection() {
@@ -147,35 +148,65 @@ public class ConnectionPool {
             return null;
         }
         
-        try {
-            Connection conn = pool.poll(CONNECTION_TIMEOUT, TimeUnit.SECONDS);
-            
-            if (conn == null) {
-                // Agregar estadísticas del pool para debugging
-                PoolStats stats = getStats();
-                plugin.getLogger().warning("Timeout obteniendo conexión del pool después de " + CONNECTION_TIMEOUT + " segundos. " + stats.toString());
-                // Intentar crear una nueva conexión como último recurso
-                return createConnection();
+        long startTime = System.currentTimeMillis();
+        int attempts = 0;
+        
+        while (attempts < MAX_RETRY_ATTEMPTS) {
+            try {
+                Connection conn = pool.poll(CONNECTION_TIMEOUT, TimeUnit.SECONDS);
+                
+                if (conn == null) {
+                    attempts++;
+                    // Agregar estadísticas del pool para debugging
+                    PoolStats stats = getStats();
+                    plugin.getLogger().warning(String.format(
+                        "Timeout obteniendo conexión del pool después de %d segundos (intento %d/%d). %s", 
+                        CONNECTION_TIMEOUT, attempts, MAX_RETRY_ATTEMPTS, stats.toString()));
+                    
+                    // En el último intento, intentar crear nueva conexión como último recurso
+                    if (attempts >= MAX_RETRY_ATTEMPTS) {
+                        plugin.getLogger().warning("Creando conexión de emergencia debido a timeout del pool");
+                        return createConnection();
+                    }
+                    
+                    // Pequeña pausa antes del siguiente intento
+                    Thread.sleep(500);
+                    continue;
+                }
+                
+                // Verificar si la conexión sigue siendo válida
+                if (conn.isClosed() || !conn.isValid(3)) {
+                    plugin.getLogger().info("Conexión inválida detectada, creando nueva");
+                    try {
+                        conn.close();
+                    } catch (SQLException ignored) {}
+                    conn = createConnection(); // Crear nueva conexión si la anterior se cerró
+                }
+                
+                // Registrar tiempo de obtención si es muy alto
+                long elapsed = System.currentTimeMillis() - startTime;
+                if (elapsed > 1000) {
+                    plugin.getLogger().info(String.format("Conexión obtenida después de %dms (intento %d)", elapsed, attempts + 1));
+                }
+                
+                return conn;
+                
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                plugin.getLogger().warning("Interrupción mientras se esperaba conexión del pool");
+                return createConnection(); // Fallback a crear nueva conexión
+            } catch (SQLException e) {
+                plugin.getLogger().log(Level.WARNING, "Error validando conexión: " + e.getMessage());
+                attempts++;
+                if (attempts >= MAX_RETRY_ATTEMPTS) {
+                    return createConnection(); // Fallback a crear nueva conexión
+                }
             }
-            
-            // Verificar si la conexión sigue siendo válida
-            if (conn.isClosed() || !conn.isValid(3)) {
-                plugin.getLogger().info("Conexión inválida detectada, creando nueva");
-                try {
-                    conn.close();
-                } catch (SQLException ignored) {}
-                conn = createConnection(); // Crear nueva conexión si la anterior se cerró
-            }
-            
-            return conn;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            plugin.getLogger().warning("Interrupción mientras se esperaba conexión del pool");
-            return createConnection(); // Fallback a crear nueva conexión
-        } catch (SQLException e) {
-            plugin.getLogger().log(Level.WARNING, "Error validando conexión: " + e.getMessage());
-            return createConnection(); // Fallback a crear nueva conexión
         }
+        
+        // Si llegamos aquí, falló completamente
+        plugin.getLogger().severe("No se pudo obtener conexión después de " + MAX_RETRY_ATTEMPTS + " intentos");
+        return createConnection(); // Último recurso
     }
     
     /**
@@ -253,6 +284,35 @@ public class ConnectionPool {
         public String toString() {
             return String.format("Pool Stats - Max: %d, Available: %d, Active: %d", 
                 maxConnections, availableConnections, activeConnections);
+        }
+    }
+    
+    /**
+     * Detecta posibles connection leaks y intenta recuperarlos
+     */
+    public void detectAndFixLeaks() {
+        if (shutdown) return;
+        
+        PoolStats stats = getStats();
+        
+        // Si todas las conexiones están activas por más de 1 minuto, puede haber leaks
+        if (stats.getAvailableConnections() == 0 && stats.getActiveConnections() >= maxConnections) {
+            plugin.getLogger().warning("Posible connection leak detectado: " + stats.toString() + " - Iniciando limpieza");
+            
+            // Forzar creación de nuevas conexiones para reemplazar las posiblemente leakeadas
+            int recovered = 0;
+            for (int i = 0; i < maxConnections && recovered < 2; i++) {
+                Connection newConn = createConnection();
+                if (newConn != null && pool.offer(newConn)) {
+                    recovered++;
+                }
+            }
+            
+            if (recovered > 0) {
+                plugin.getLogger().info("Recuperadas " + recovered + " conexiones del pool");
+            } else {
+                plugin.getLogger().severe("No se pudieron recuperar conexiones - problema crítico de base de datos");
+            }
         }
     }
     
