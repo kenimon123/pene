@@ -224,9 +224,6 @@ public class ShopManager {
         // Generar artículos disponibles para hoy
         generateDailyItems();
 
-        // Generar ítems diarios
-        generateDailyItems();
-
         // Actualizar tiempo
         lastUpdateTime = System.currentTimeMillis();
 

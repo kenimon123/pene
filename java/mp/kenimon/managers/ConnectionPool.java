@@ -5,6 +5,7 @@ import mp.kenimon.Kenicompetitivo;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -71,15 +72,29 @@ public class ConnectionPool {
         
         while (retryCount < maxRetries) {
             try {
+                // Crear conexión con timeout
                 conn = DriverManager.getConnection(connectionUrl);
+                
+                // Verificar que la conexión es válida
+                if (!conn.isValid(5)) {
+                    throw new SQLException("Conexión no válida después de crear");
+                }
+                
                 stmt = conn.createStatement();
                 
-                // Optimizaciones específicas para SQLite - ejecutar una por una
-                stmt.execute("PRAGMA synchronous = NORMAL");  // Balance entre seguridad y rendimiento
-                stmt.execute("PRAGMA cache_size = 10000");    // Cache de 10MB aproximadamente
-                stmt.execute("PRAGMA temp_store = MEMORY");   // Tablas temporales en memoria
-                stmt.execute("PRAGMA busy_timeout = 30000");  // Timeout de 30 segundos
+                // Optimizaciones específicas para SQLite - ejecutar una por una con validación
+                try {
+                    stmt.execute("PRAGMA synchronous = NORMAL");  // Balance entre seguridad y rendimiento
+                    stmt.execute("PRAGMA cache_size = 10000");    // Cache de 10MB aproximadamente
+                    stmt.execute("PRAGMA temp_store = MEMORY");   // Tablas temporales en memoria
+                    stmt.execute("PRAGMA busy_timeout = 30000");  // Timeout de 30 segundos
+                    stmt.execute("PRAGMA journal_mode = WAL");    // Modo WAL para mejor concurrencia
+                } catch (SQLException pragmaEx) {
+                    plugin.getLogger().warning("Error configurando PRAGMAs SQLite: " + pragmaEx.getMessage());
+                    // Continuar aunque los PRAGMAs fallen - la conexión básica funciona
+                }
                 
+                stmt.close();
                 return conn;
                 
             } catch (SQLException e) {
@@ -93,7 +108,8 @@ public class ConnectionPool {
                     try { conn.close(); } catch (SQLException ignored) {}
                 }
                 
-                if (e.getErrorCode() == 5 || e.getMessage().contains("database is locked")) {
+                if (e.getErrorCode() == 5 || e.getMessage().contains("database is locked") || 
+                    e.getMessage().contains("busy")) {
                     // Error SQLITE_BUSY - reintentar con backoff exponencial
                     try {
                         long waitTime = (long) Math.pow(2, retryCount) * 100; // 200ms, 400ms, 800ms
@@ -109,15 +125,11 @@ public class ConnectionPool {
                     }
                 }
                 
-                plugin.getLogger().log(Level.SEVERE, "Error al crear conexión a la base de datos (intento " + retryCount + "/" + maxRetries + ")", e);
+                plugin.getLogger().log(Level.WARNING, "Error al crear conexión a la base de datos (intento " + retryCount + "/" + maxRetries + "): " + e.getMessage());
                 
                 if (retryCount >= maxRetries) {
+                    plugin.getLogger().log(Level.SEVERE, "No se pudo crear conexión después de " + maxRetries + " intentos", e);
                     return null;
-                }
-            } finally {
-                // Asegurar que el statement se cierre
-                if (stmt != null) {
-                    try { stmt.close(); } catch (SQLException ignored) {}
                 }
             }
         }
@@ -131,24 +143,35 @@ public class ConnectionPool {
      */
     public Connection getConnection() {
         if (shutdown) {
+            plugin.getLogger().warning("Intentando obtener conexión de pool cerrado");
             return null;
         }
         
         try {
             Connection conn = pool.poll(CONNECTION_TIMEOUT, TimeUnit.SECONDS);
             
+            if (conn == null) {
+                plugin.getLogger().warning("Timeout obteniendo conexión del pool después de " + CONNECTION_TIMEOUT + " segundos");
+                // Intentar crear una nueva conexión como último recurso
+                return createConnection();
+            }
+            
             // Verificar si la conexión sigue siendo válida
-            if (conn != null && (conn.isClosed() || !conn.isValid(5))) {
+            if (conn.isClosed() || !conn.isValid(3)) {
+                plugin.getLogger().info("Conexión inválida detectada, creando nueva");
+                try {
+                    conn.close();
+                } catch (SQLException ignored) {}
                 conn = createConnection(); // Crear nueva conexión si la anterior se cerró
             }
             
             return conn;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            plugin.getLogger().warning("Timeout obteniendo conexión del pool");
-            return null;
+            plugin.getLogger().warning("Interrupción mientras se esperaba conexión del pool");
+            return createConnection(); // Fallback a crear nueva conexión
         } catch (SQLException e) {
-            plugin.getLogger().log(Level.WARNING, "Error validando conexión", e);
+            plugin.getLogger().log(Level.WARNING, "Error validando conexión: " + e.getMessage());
             return createConnection(); // Fallback a crear nueva conexión
         }
     }

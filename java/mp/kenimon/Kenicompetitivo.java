@@ -43,7 +43,6 @@ public class Kenicompetitivo extends JavaPlugin {
         // Inicializamos la configuración y mensajes
         configManager = new ConfigManager(this);
         configManager.loadConfigs();
-        configManager.loadShopConfig();
 
         // Inicializar monitor de rendimiento
         performanceMonitor = new PerformanceMonitor(this);
