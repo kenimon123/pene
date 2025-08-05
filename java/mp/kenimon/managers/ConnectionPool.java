@@ -23,9 +23,9 @@ public class ConnectionPool {
     private final int maxConnections;
     private volatile boolean shutdown = false;
     
-    // Configuración optimizada para SQLite
-    private static final int DEFAULT_POOL_SIZE = 1; // SQLite funciona mejor con una sola conexión
-    private static final int CONNECTION_TIMEOUT = 10; // segundos
+    // Configuración optimizada para SQLite con concurrencia mejorada
+    private static final int DEFAULT_POOL_SIZE = 5; // Incrementado para manejar operaciones concurrentes
+    private static final int CONNECTION_TIMEOUT = 5; // Reducido a 5 segundos para detectar problemas más rápido
     
     public ConnectionPool(Kenicompetitivo plugin, String connectionUrl) {
         this(plugin, connectionUrl, DEFAULT_POOL_SIZE);
@@ -85,10 +85,12 @@ public class ConnectionPool {
                 // Optimizaciones específicas para SQLite - ejecutar una por una con validación
                 try {
                     stmt.execute("PRAGMA synchronous = NORMAL");  // Balance entre seguridad y rendimiento
-                    stmt.execute("PRAGMA cache_size = 10000");    // Cache de 10MB aproximadamente
+                    stmt.execute("PRAGMA cache_size = 20000");    // Cache de 20MB aproximadamente  
                     stmt.execute("PRAGMA temp_store = MEMORY");   // Tablas temporales en memoria
                     stmt.execute("PRAGMA busy_timeout = 30000");  // Timeout de 30 segundos
                     stmt.execute("PRAGMA journal_mode = WAL");    // Modo WAL para mejor concurrencia
+                    stmt.execute("PRAGMA wal_autocheckpoint = 1000"); // Checkpoint cada 1000 páginas
+                    stmt.execute("PRAGMA read_uncommitted = true"); // Permitir lecturas no comprometidas para mejor rendimiento
                 } catch (SQLException pragmaEx) {
                     plugin.getLogger().warning("Error configurando PRAGMAs SQLite: " + pragmaEx.getMessage());
                     // Continuar aunque los PRAGMAs fallen - la conexión básica funciona
@@ -138,7 +140,7 @@ public class ConnectionPool {
     }
     
     /**
-     * Obtiene una conexión del pool
+     * Obtiene una conexión del pool con manejo mejorado de timeouts
      * @return Connection o null si no está disponible
      */
     public Connection getConnection() {
@@ -148,16 +150,33 @@ public class ConnectionPool {
         }
         
         try {
-            Connection conn = pool.poll(CONNECTION_TIMEOUT, TimeUnit.SECONDS);
+            // Intentar obtener conexión inmediatamente primero
+            Connection conn = pool.poll();
+            if (conn != null) {
+                // Verificar si la conexión sigue siendo válida
+                if (!conn.isClosed() && conn.isValid(1)) {
+                    return conn;
+                } else {
+                    plugin.getLogger().info("Conexión inválida detectada, creando nueva");
+                    try {
+                        conn.close();
+                    } catch (SQLException ignored) {}
+                    conn = createConnection();
+                    return conn;
+                }
+            }
+            
+            // Si no hay conexión disponible inmediatamente, esperar un tiempo reducido
+            conn = pool.poll(CONNECTION_TIMEOUT, TimeUnit.SECONDS);
             
             if (conn == null) {
                 plugin.getLogger().warning("Timeout obteniendo conexión del pool después de " + CONNECTION_TIMEOUT + " segundos");
-                // Intentar crear una nueva conexión como último recurso
-                return createConnection();
+                // En lugar de crear una nueva conexión costosa, devolver null para manejo asíncrono
+                return null;
             }
             
             // Verificar si la conexión sigue siendo válida
-            if (conn.isClosed() || !conn.isValid(3)) {
+            if (conn.isClosed() || !conn.isValid(2)) {
                 plugin.getLogger().info("Conexión inválida detectada, creando nueva");
                 try {
                     conn.close();
@@ -169,10 +188,10 @@ public class ConnectionPool {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             plugin.getLogger().warning("Interrupción mientras se esperaba conexión del pool");
-            return createConnection(); // Fallback a crear nueva conexión
+            return null; // No crear conexión de fallback para evitar bloqueos
         } catch (SQLException e) {
             plugin.getLogger().log(Level.WARNING, "Error validando conexión: " + e.getMessage());
-            return createConnection(); // Fallback a crear nueva conexión
+            return null; // No crear conexión de fallback para evitar bloqueos
         }
     }
     
