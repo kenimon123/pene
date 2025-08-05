@@ -65,7 +65,7 @@ public class DatabaseManager {
     }
 
     /**
-     * Obtiene una conexión a la base de datos del pool con manejo mejorado de errores
+     * Obtiene una conexión a la base de datos del pool
      */
     public Connection getConnection() throws SQLException {
         long startTime = System.currentTimeMillis();
@@ -77,7 +77,7 @@ public class DatabaseManager {
             try {
                 conn = connectionPool.getConnection();
                 if (conn == null) {
-                    throw new SQLException("No se pudo obtener conexión del pool - timeout");
+                    throw new SQLException("No se pudo obtener conexión del pool");
                 }
                 
                 // Registrar métricas de rendimiento
@@ -708,87 +708,45 @@ public class DatabaseManager {
     }
 
     /**
-     * Verifica si un jugador tiene desbloqueado un cosmético de forma asíncrona
-     * Esto evita bloquear el thread principal en operaciones de consulta
+     * Verifica si un jugador tiene desbloqueado un cosmético
      */
     public boolean hasUnlockedCosmetic(UUID uuid, String effectId) {
-        Connection conn = null;
-        try {
-            conn = getConnection();
-            if (conn == null) {
-                // Si no podemos obtener conexión, asumir false por defecto
-                plugin.getLogger().warning("No se pudo verificar cosmético desbloqueado para " + uuid + " - sin conexión disponible");
-                return false;
-            }
-            
-            try (PreparedStatement ps = conn.prepareStatement(
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(
                      "SELECT 1 FROM cosmetics_unlocked WHERE uuid = ? AND effect_id = ?")) {
 
-                ps.setString(1, uuid.toString());
-                ps.setString(2, effectId);
-                ResultSet rs = ps.executeQuery();
-                boolean unlocked = rs.next();
-                rs.close();
-                return unlocked;
-            }
+            ps.setString(1, uuid.toString());
+            ps.setString(2, effectId);
+            ResultSet rs = ps.executeQuery();
+            boolean unlocked = rs.next();
+            rs.close();
+            return unlocked;
 
         } catch (SQLException e) {
             plugin.getLogger().warning("Error al verificar cosmético desbloqueado: " + e.getMessage());
             return false;
-        } finally {
-            if (conn != null) {
-                returnConnection(conn);
-            }
         }
-    }
-    
-    /**
-     * Verifica si un jugador tiene desbloqueado un cosmético de forma asíncrona
-     * Para evitar bloqueos del thread principal
-     */
-    public CompletableFuture<Boolean> hasUnlockedCosmeticAsync(UUID uuid, String effectId) {
-        return CompletableFuture.supplyAsync(() -> {
-            return hasUnlockedCosmetic(uuid, effectId);
-        }, databaseExecutor);
     }
 
     /**
-     * Obtiene todos los cosméticos desbloqueados de un jugador con manejo mejorado de conexiones
+     * Obtiene todos los cosméticos desbloqueados de un jugador
      */
     public List<String> getUnlockedCosmetics(UUID uuid) {
         List<String> unlocked = new ArrayList<>();
-        Connection conn = null;
 
-        try {
-            conn = getConnection();
-            if (conn == null) {
-                plugin.getLogger().warning("No se pudieron cargar cosméticos para " + uuid + " - sin conexión disponible");
-                return unlocked; // Devolver lista vacía si no hay conexión
-            }
-            
-            try (PreparedStatement ps = conn.prepareStatement(
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(
                      "SELECT effect_id FROM cosmetics_unlocked WHERE uuid = ?")) {
 
-                ps.setString(1, uuid.toString());
-                ResultSet rs = ps.executeQuery();
+            ps.setString(1, uuid.toString());
+            ResultSet rs = ps.executeQuery();
 
-                while (rs.next()) {
-                    unlocked.add(rs.getString("effect_id"));
-                }
-
-                rs.close();
-                return unlocked;
+            while (rs.next()) {
+                unlocked.add(rs.getString("effect_id"));
             }
 
-        } catch (SQLException e) {
-            plugin.getLogger().warning("Error al obtener cosméticos desbloqueados: " + e.getMessage());
-            return unlocked; // Devolver lista vacía en caso de error
-        } finally {
-            if (conn != null) {
-                returnConnection(conn);
-            }
-        }
-    }
+            rs.close();
+            return unlocked;
 
         } catch (SQLException e) {
             plugin.getLogger().warning("Error al obtener cosméticos desbloqueados: " + e.getMessage());
