@@ -1,9 +1,44 @@
 # Configuración del plugin de trofeos
+
+# Configuración de rendimiento de la base de datos
+database:
+  # Tamaño del pool de conexiones (recomendado: 2-4 para SQLite)
+  pool_size: 3
+  # Habilitar logs de debug para operaciones de DB
+  debug: false
+  # Intervalo para procesar actualizaciones batch (en ticks, 20 = 1 segundo)
+  batch_process_interval: 100
+  # Cantidad mínima de updates para trigger batch processing
+  batch_size_threshold: 15
+
+# Configuración de cache para optimizar rendimiento  
+cache:
+  # Tiempo de expiración del cache en milisegundos (default: 1 minuto)
+  expiry_time: 60000
+  # Limpiar cache de jugadores offline cada X minutos
+  cleanup_interval: 10
+  # Precargar datos de jugadores al unirse
+  preload_on_join: true
+
+# Configuración de rendimiento general
+performance:
+  # Umbral mínimo de racha para mostrar en rankings (reduce queries)
+  min_streak_threshold: 1
+  # Reducir frecuencia de updates de hologramas (en segundos)
+  hologram_update_interval: 300
+  # Limitar actualizaciones de rankings (en segundos)  
+  ranking_update_interval: 600
+  # Habilitar monitoreo de rendimiento
+  monitoring:
+    enabled: true
+    # Reportar estadísticas cada X minutos
+    report_interval: 5
+
 auto_updates:
   enabled: true
-  interval: 6000  # En ticks (20 ticks = 1 segundo, 6000 = 5 minutos)
-  broadcast: false  # Si es true, envía un mensaje cuando se actualiza
-  save_interval: 6000  # Guardar datos en DB cada 5 minutos
+  interval: 12000  # Aumentado a 10 minutos para reducir carga (era 6000)
+  broadcast: false
+  save_interval: 12000  # Aumentado para reducir escrituras frecuentes
 
 # Nombre de la moneda virtual (puedes cambiar "trofeos" por otro)
 currency_name: trofeos

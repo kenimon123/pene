@@ -30,6 +30,7 @@ public class Kenicompetitivo extends JavaPlugin {
     private RewardManager rewardManager;
     private WorldGuardUtil worldGuardUtil;
     private VaultManager vaultManager;
+    private PerformanceMonitor performanceMonitor;
 
     public static Kenicompetitivo getInstance() {
         return instance;
@@ -43,6 +44,9 @@ public class Kenicompetitivo extends JavaPlugin {
         configManager = new ConfigManager(this);
         configManager.loadConfigs();
         configManager.loadShopConfig();
+
+        // Inicializar monitor de rendimiento
+        performanceMonitor = new PerformanceMonitor(this);
 
         // Base de datos
         databaseManager = new DatabaseManager(this);
@@ -205,5 +209,9 @@ public class Kenicompetitivo extends JavaPlugin {
 
     public GemManager getGemManager() {
         return gemManager;
+    }
+
+    public PerformanceMonitor getPerformanceMonitor() {
+        return performanceMonitor;
     }
 }
