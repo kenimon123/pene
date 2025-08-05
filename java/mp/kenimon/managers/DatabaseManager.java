@@ -68,10 +68,18 @@ public class DatabaseManager {
      * Obtiene una conexión a la base de datos del pool
      */
     public Connection getConnection() throws SQLException {
+        long startTime = System.currentTimeMillis();
         Connection conn = connectionPool.getConnection();
         if (conn == null) {
             throw new SQLException("No se pudo obtener conexión del pool");
         }
+        
+        // Registrar métricas de rendimiento
+        long queryTime = System.currentTimeMillis() - startTime;
+        if (plugin.getPerformanceMonitor() != null) {
+            plugin.getPerformanceMonitor().recordDbQuery(queryTime);
+        }
+        
         return conn;
     }
 
@@ -80,6 +88,13 @@ public class DatabaseManager {
      */
     public void returnConnection(Connection conn) {
         connectionPool.returnConnection(conn);
+    }
+    
+    /**
+     * Obtiene el pool de conexiones para estadísticas
+     */
+    public ConnectionPool getConnectionPool() {
+        return connectionPool;
     }
 
     /**
@@ -471,6 +486,11 @@ public class DatabaseManager {
 
                 conn.commit();
                 ps.close();
+
+                // Registrar métricas de rendimiento
+                if (plugin.getPerformanceMonitor() != null) {
+                    plugin.getPerformanceMonitor().recordBatchOperation(toProcess.size());
+                }
 
                 if (plugin.getConfig().getBoolean("database.debug", false)) {
                     plugin.getLogger().info("Procesadas " + toProcess.size() + " actualizaciones batch");

@@ -2,6 +2,7 @@ package mp.kenimon.commands;
 
 import mp.kenimon.Kenicompetitivo;
 import mp.kenimon.cosmetics.CosmeticEffect;
+import mp.kenimon.managers.ConnectionPool;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -60,6 +61,9 @@ public class KenicompetitivoCommand implements CommandExecutor, TabCompleter {
                 break;
             case "debug":
                 handleDebugCommand(sender, args);
+                break;
+            case "stats":
+                handleStatsCommand(sender);
                 break;
             case "hologram":
                 handleHologramCommand(sender, args);
@@ -514,6 +518,34 @@ public class KenicompetitivoCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Maneja el comando de estadísticas de rendimiento
+     */
+    private void handleStatsCommand(CommandSender sender) {
+        if (plugin.getPerformanceMonitor() == null) {
+            sender.sendMessage(ChatColor.RED + "Monitor de rendimiento no inicializado.");
+            return;
+        }
+
+        String stats = plugin.getPerformanceMonitor().getStatsForCommand();
+        String[] lines = stats.split("\n");
+        
+        for (String line : lines) {
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
+        }
+        
+        // Información adicional del connection pool
+        try {
+            ConnectionPool.PoolStats poolStats = plugin.getDatabaseManager().getConnectionPool().getStats();
+            sender.sendMessage(ChatColor.YELLOW + "=== Connection Pool ===");
+            sender.sendMessage(ChatColor.YELLOW + "Conexiones disponibles: " + ChatColor.WHITE + poolStats.getAvailableConnections());
+            sender.sendMessage(ChatColor.YELLOW + "Conexiones activas: " + ChatColor.WHITE + poolStats.getActiveConnections());
+            sender.sendMessage(ChatColor.YELLOW + "Total conexiones: " + ChatColor.WHITE + poolStats.getMaxConnections());
+        } catch (Exception e) {
+            sender.sendMessage(ChatColor.RED + "Error obteniendo stats del pool: " + e.getMessage());
+        }
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
@@ -521,7 +553,7 @@ public class KenicompetitivoCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             // Subcomandos principales
             return StringUtil.copyPartialMatches(args[0],
-                    Arrays.asList("reload", "trofeos", "racha", "cosmetico", "debug", "hologram"),
+                    Arrays.asList("reload", "trofeos", "racha", "cosmetico", "debug", "stats", "hologram"),
                     completions);
         } else if (args.length == 2) {
             // Opciones para subcomandos

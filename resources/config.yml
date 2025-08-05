@@ -28,6 +28,11 @@ performance:
   hologram_update_interval: 300
   # Limitar actualizaciones de rankings (en segundos)  
   ranking_update_interval: 600
+  # Habilitar monitoreo de rendimiento
+  monitoring:
+    enabled: true
+    # Reportar estadísticas cada X minutos
+    report_interval: 5
 
 auto_updates:
   enabled: true

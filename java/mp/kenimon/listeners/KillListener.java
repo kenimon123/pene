@@ -26,6 +26,11 @@ public class KillListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerDeath(PlayerDeathEvent event) {
+        // Registrar kill procesado para métricas
+        if (plugin.getPerformanceMonitor() != null) {
+            plugin.getPerformanceMonitor().recordKillProcessed();
+        }
+        
         Player victim = event.getEntity();
         Player killer = victim.getKiller();
 

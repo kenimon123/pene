@@ -47,7 +47,15 @@ public class CacheManager implements Listener {
 
     public int getCachedTrophies(UUID uuid) {
         if (trophiesCache.containsKey(uuid)) {
+            // Registrar cache hit
+            if (plugin.getPerformanceMonitor() != null) {
+                plugin.getPerformanceMonitor().recordCacheHit();
+            }
             return trophiesCache.get(uuid);
+        }
+        // Registrar cache miss
+        if (plugin.getPerformanceMonitor() != null) {
+            plugin.getPerformanceMonitor().recordCacheMiss();
         }
         // Si no está en caché, obtener de DB y almacenar en caché
         int trophies = plugin.getDatabaseManager().getTrophies(uuid);
@@ -81,6 +89,11 @@ public class CacheManager implements Listener {
      * Actualiza trofeos usando batch operations (OPTIMIZADO)
      */
     public void updateTrophies(UUID uuid, int amount) {
+        // Registrar métricas
+        if (plugin.getPerformanceMonitor() != null) {
+            plugin.getPerformanceMonitor().recordTrophyUpdate();
+        }
+        
         // Actualizar en caché
         int currentTrophies = getCachedTrophies(uuid);
         int newTrophies = currentTrophies + amount;
