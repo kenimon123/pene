@@ -43,8 +43,8 @@ public class DatabaseManager {
         File dbFile = new File(plugin.getDataFolder(), "kenicompetitivo.db");
         this.connectionUrl = "jdbc:sqlite:" + dbFile.getAbsolutePath();
 
-        // Crear pool de conexiones optimizado - usar 1 conexión por defecto para SQLite
-        int poolSize = plugin.getConfig().getInt("database.pool_size", 1);
+        // Crear pool de conexiones optimizado - usar 2 conexiones por defecto para SQLite (reducido)
+        int poolSize = plugin.getConfig().getInt("database.pool_size", 2);
         this.connectionPool = new ConnectionPool(plugin, connectionUrl, poolSize);
         
         // Crear executor para operaciones de base de datos asíncronas
@@ -67,10 +67,15 @@ public class DatabaseManager {
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             connectionPool.healthCheck();
         }, 2400L, 2400L); // Cada 2 minutos
+        
+        // Programar detección de leaks cada 30 segundos
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+            connectionPool.detectAndFixLeaks();
+        }, 600L, 600L); // Cada 30 segundos
     }
 
     /**
-     * Obtiene una conexión a la base de datos del pool
+     * Obtiene una conexión a la base de datos del pool con manejo mejorado de errores
      */
     public Connection getConnection() throws SQLException {
         long startTime = System.currentTimeMillis();
@@ -82,11 +87,15 @@ public class DatabaseManager {
             try {
                 conn = connectionPool.getConnection();
                 if (conn == null) {
-                    throw new SQLException("No se pudo obtener conexión del pool");
+                    throw new SQLException("No se pudo obtener conexión del pool después de " + retryCount + " intentos");
                 }
                 
-                // Registrar métricas de rendimiento
+                // Registrar métricas de rendimiento solo si toma mucho tiempo
                 long queryTime = System.currentTimeMillis() - startTime;
+                if (queryTime > 2000) { // Solo log si toma más de 2 segundos
+                    plugin.getLogger().warning("Conexión DB obtenida después de " + queryTime + "ms (retries: " + retryCount + ")");
+                }
+                
                 if (plugin.getPerformanceMonitor() != null) {
                     plugin.getPerformanceMonitor().recordDbQuery(queryTime);
                 }
@@ -97,10 +106,10 @@ public class DatabaseManager {
                 retryCount++;
                 
                 if (e.getMessage().contains("database is locked") || e.getMessage().contains("busy")) {
-                    // Base de datos ocupada - reintentar
+                    // Base de datos ocupada - reintentar con backoff exponencial
                     if (retryCount < maxRetries) {
                         try {
-                            long waitTime = (long) Math.pow(2, retryCount) * 50; // 100ms, 200ms, 400ms
+                            long waitTime = (long) Math.pow(2, retryCount) * 100; // 200ms, 400ms, 800ms
                             Thread.sleep(waitTime);
                         } catch (InterruptedException ie) {
                             Thread.currentThread().interrupt();
@@ -112,7 +121,10 @@ public class DatabaseManager {
                 }
                 
                 // Si llegamos aquí, falló definitivamente
-                throw e;
+                if (retryCount >= maxRetries) {
+                    plugin.getLogger().severe("Error crítico: No se pudo obtener conexión después de " + maxRetries + " intentos. Pool stats: " + getPoolStats());
+                    throw e;
+                }
             }
         }
         

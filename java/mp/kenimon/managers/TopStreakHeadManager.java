@@ -594,9 +594,11 @@ public class TopStreakHeadManager {
                 secondTopStreak = newStreak;
             }
 
-            // IMPORTANTE: Actualizar los rankings siempre después de cualquier cambio en rachas
-            plugin.getRankingManager().updateRanking("killstreak", "Racha", "kill_streak", "DESC");
-            plugin.getRankingManager().updateHolograms();
+            // CRÍTICO: Mover operaciones de DB a asíncrono para no bloquear el hilo principal
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                plugin.getRankingManager().updateRanking("killstreak", "Racha", "kill_streak", "DESC");
+                // updateHolograms ya se llama automáticamente desde updateRanking
+            });
         }
     }
 
