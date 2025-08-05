@@ -77,6 +77,9 @@ public class CacheManager implements Listener {
 
     // Actualizar valores en caché y marcar para actualización
 
+    /**
+     * Actualiza trofeos usando batch operations (OPTIMIZADO)
+     */
     public void updateTrophies(UUID uuid, int amount) {
         // Actualizar en caché
         int currentTrophies = getCachedTrophies(uuid);
@@ -86,51 +89,39 @@ public class CacheManager implements Listener {
         int maxTrophies = plugin.getConfigManager().getConfig().getInt("max_total_trophies", 10000);
         newTrophies = Math.min(newTrophies, maxTrophies);
 
+        // Actualizar caché inmediatamente
         trophiesCache.put(uuid, newTrophies);
-        pendingTrophiesUpdates.put(uuid, newTrophies);
 
-        // Programar actualización a la DB después de un corto retraso
-        // para agrupar actualizaciones rápidas
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                savePlayerTrophies(uuid);
-            }
-        }.runTaskLaterAsynchronously(plugin, 40L);// 2 segundos
+        // Usar batch operation para DB (más eficiente)
+        plugin.getDatabaseManager().updateTrophiesBatch(uuid, newTrophies);
     }
 
     /**
      * Actualiza la racha de kills de un jugador en la caché
+     * OPTIMIZADO: Usa batch operations para reducir consultas SQL
      */
     public void updateKillStreak(UUID uuid, int streak) {
-        // CORRECCIÓN: Usar killStreakCache en lugar de killStreaks
+        // Actualizar caché inmediatamente
         killStreakCache.put(uuid, streak);
-        pendingKillStreakUpdates.put(uuid, streak);
-
+        
         // Si es una racha nueva récord para el jugador, actualizar también la máxima
         int currentMax = getCachedMaxKillStreak(uuid);
         if (streak > currentMax) {
-            // CORRECCIÓN: Usar maxKillStreakCache en lugar de maxKillStreaks
             maxKillStreakCache.put(uuid, streak);
-
-            // CORRECCIÓN: No existe la variable pendingMaxKillStreakUpdates en tu código
-            // Necesitas actualizar directamente en la base de datos
-            plugin.getDatabaseManager().updateMaxKillStreak(uuid, streak, success -> {
-                if (!success) {
-                    plugin.getLogger().warning("Error al actualizar la racha máxima de kills para " + uuid);
-                }
-            });
         }
 
-        // CRÍTICO: Si la racha es 0 (murió), asegurarse de que se actualice inmediatamente
-        // para que no aparezca en hologramas ni cabeza
+        // CRÍTICO: Si la racha es 0 (murió), usar operación síncrona para actualización inmediata
         if (streak == 0) {
             try {
-                // CORRECCIÓN: Usar savePlayerKillStreak en lugar de saveKillStreakPendingChanges
-                savePlayerKillStreak(uuid);
+                // Para rachas que se resetean, actualizar inmediatamente en DB
+                plugin.getDatabaseManager().setKillStreak(uuid, streak);
             } catch (Exception e) {
                 plugin.getLogger().severe("ERROR al guardar racha 0: " + e.getMessage());
             }
+        } else {
+            // Para rachas > 0, usar batch operation (más eficiente)
+            plugin.getDatabaseManager().updateKillStreakBatch(uuid, streak, 
+                streak > currentMax ? streak : -1);
         }
     }
 
