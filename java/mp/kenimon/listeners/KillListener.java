@@ -99,12 +99,13 @@ public class KillListener implements Listener {
             // Verificar desbloqueos de cosméticos
             plugin.getCosmeticManager().checkStreakUnlocks(killer, newStreak);
 
-            // Reproducir efectos de sonido si tiene alguno seleccionado
-            plugin.getCosmeticManager().playSoundEffectForPlayer(killer);
-
             // Actualizar lista de jugadores top streak si es necesario
             plugin.getTopStreakHeadManager().checkStreakUpdate(killer.getUniqueId(), newStreak);
         });
+
+        // CORREGIDO: Ejecutar efectos de kill y sonidos inmediatamente (no asincrónicamente)
+        // para garantizar que se muestren al momento de la muerte
+        plugin.getCosmeticManager().handleKillEvent(killer, victim);
 
         // Si la víctima era el jugador con mejor racha, dar recompensa
         if (isKillingTopPlayer && oldVictimStreak > 0) {

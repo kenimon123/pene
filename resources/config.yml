@@ -644,6 +644,7 @@ rankings:
 # Configuración de cosméticos
 cosmetics:
   enabled: true # Activar/desactivar todo el sistema de cosméticos
+  debug: false # Activar logs de debug para cosméticos (útil para diagnóstico)
   menu:
     title: '&x&2&C&B&1&F&F&lC&x&2&B&B&4&F&F&lO&x&2&A&B&6&F&F&lS&x&2&9&B&9&F&F&lM&x&2&8&B&C&F&F&lE&x&2&6&B&E&F&F&lT&x&2&5&C&1&F&F&lI&x&2&4&C&4&F&F&lC&x&2&3&C&6&F&F&lO&x&2&2&C&9&F&F&lS'
     rows: 4
@@ -810,7 +811,7 @@ cosmetics:
           - sound_blaze
           - sound_anvil
           - sound_fox
-          - kill_musical
+          - musical_death
           - kill_vortex
       '40':
         effects:
@@ -824,16 +825,16 @@ cosmetics:
           - kill_meteor
           - kill_blackhole
           - kill_ghost
-          - kill_lava
-          - kill_phantom
+          - lava_eruption
+          - phantom_strike
       '100':
         effects:
-          - kill_bro_respeta
-          - kill_thanos
-          - kill_ice_prison
-          - kill_rainbow
-          - kill_rocket
-          - kill_treasure
+          - bro_respeta
+          - thanos_snap
+          - ice_prison
+          - rainbow_explosion
+          - rocket_launch
+          - treasure_explosion
 
   # Efectos personalizados (aparecerán en el menú)
   custom_effects:
