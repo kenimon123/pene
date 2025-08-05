@@ -43,8 +43,8 @@ public class DatabaseManager {
         File dbFile = new File(plugin.getDataFolder(), "kenicompetitivo.db");
         this.connectionUrl = "jdbc:sqlite:" + dbFile.getAbsolutePath();
 
-        // Crear pool de conexiones optimizado
-        int poolSize = plugin.getConfig().getInt("database.pool_size", 3);
+        // Crear pool de conexiones optimizado - usar 1 conexión por defecto para SQLite
+        int poolSize = plugin.getConfig().getInt("database.pool_size", 1);
         this.connectionPool = new ConnectionPool(plugin, connectionUrl, poolSize);
         
         // Crear executor para operaciones de base de datos asíncronas
@@ -69,18 +69,49 @@ public class DatabaseManager {
      */
     public Connection getConnection() throws SQLException {
         long startTime = System.currentTimeMillis();
-        Connection conn = connectionPool.getConnection();
-        if (conn == null) {
-            throw new SQLException("No se pudo obtener conexión del pool");
+        Connection conn = null;
+        int retryCount = 0;
+        final int maxRetries = 3;
+        
+        while (retryCount < maxRetries) {
+            try {
+                conn = connectionPool.getConnection();
+                if (conn == null) {
+                    throw new SQLException("No se pudo obtener conexión del pool");
+                }
+                
+                // Registrar métricas de rendimiento
+                long queryTime = System.currentTimeMillis() - startTime;
+                if (plugin.getPerformanceMonitor() != null) {
+                    plugin.getPerformanceMonitor().recordDbQuery(queryTime);
+                }
+                
+                return conn;
+                
+            } catch (SQLException e) {
+                retryCount++;
+                
+                if (e.getMessage().contains("database is locked") || e.getMessage().contains("busy")) {
+                    // Base de datos ocupada - reintentar
+                    if (retryCount < maxRetries) {
+                        try {
+                            long waitTime = (long) Math.pow(2, retryCount) * 50; // 100ms, 200ms, 400ms
+                            Thread.sleep(waitTime);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                            throw new SQLException("Interrupción mientras se esperaba reconexión", ie);
+                        }
+                        plugin.getLogger().warning("Base de datos ocupada, reintentando obtener conexión... (" + retryCount + "/" + maxRetries + ")");
+                        continue;
+                    }
+                }
+                
+                // Si llegamos aquí, falló definitivamente
+                throw e;
+            }
         }
         
-        // Registrar métricas de rendimiento
-        long queryTime = System.currentTimeMillis() - startTime;
-        if (plugin.getPerformanceMonitor() != null) {
-            plugin.getPerformanceMonitor().recordDbQuery(queryTime);
-        }
-        
-        return conn;
+        throw new SQLException("No se pudo obtener conexión después de " + maxRetries + " intentos");
     }
 
     /**
@@ -102,10 +133,14 @@ public class DatabaseManager {
      */
     public void setupDatabase() {
         Connection conn = null;
+        Statement stmt = null;
         try {
             conn = getConnection();
-            Statement stmt = conn.createStatement();
-
+            stmt = conn.createStatement();
+            
+            // Configurar WAL mode una sola vez durante la inicialización
+            stmt.execute("PRAGMA journal_mode = WAL");
+            
             // Tabla principal de jugadores con índices optimizados
             String sql = "CREATE TABLE IF NOT EXISTS players (" +
                     "uuid TEXT PRIMARY KEY, " +
@@ -147,6 +182,9 @@ public class DatabaseManager {
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Error configurando la base de datos", e);
         } finally {
+            if (stmt != null) {
+                try { stmt.close(); } catch (SQLException ignored) {}
+            }
             returnConnection(conn);
         }
     }

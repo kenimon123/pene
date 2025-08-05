@@ -23,7 +23,7 @@ public class ConnectionPool {
     private volatile boolean shutdown = false;
     
     // Configuración optimizada para SQLite
-    private static final int DEFAULT_POOL_SIZE = 3; // SQLite no necesita muchas conexiones concurrentes
+    private static final int DEFAULT_POOL_SIZE = 1; // SQLite funciona mejor con una sola conexión
     private static final int CONNECTION_TIMEOUT = 10; // segundos
     
     public ConnectionPool(Kenicompetitivo plugin, String connectionUrl) {
@@ -44,10 +44,15 @@ public class ConnectionPool {
     
     private void initializePool() {
         try {
+            // Crear conexiones secuencialmente para evitar conflictos de concurrencia
             for (int i = 0; i < maxConnections; i++) {
-                Connection conn = createConnection();
-                if (conn != null) {
-                    pool.offer(conn);
+                synchronized (this) {
+                    Connection conn = createConnection();
+                    if (conn != null) {
+                        pool.offer(conn);
+                    }
+                    // Pequeña pausa entre conexiones para SQLite
+                    Thread.sleep(100);
                 }
             }
         } catch (Exception e) {
@@ -59,21 +64,65 @@ public class ConnectionPool {
      * Crea una nueva conexión optimizada para SQLite
      */
     private Connection createConnection() {
-        try {
-            Connection conn = DriverManager.getConnection(connectionUrl);
-            
-            // Optimizaciones específicas para SQLite
-            conn.createStatement().execute("PRAGMA synchronous = NORMAL");  // Balance entre seguridad y rendimiento
-            conn.createStatement().execute("PRAGMA cache_size = 10000");    // Cache de 10MB aproximadamente
-            conn.createStatement().execute("PRAGMA temp_store = MEMORY");   // Tablas temporales en memoria
-            conn.createStatement().execute("PRAGMA journal_mode = WAL");    // Write-Ahead Logging para mejor rendimiento
-            conn.createStatement().execute("PRAGMA busy_timeout = 30000");  // Timeout de 30 segundos
-            
-            return conn;
-        } catch (SQLException e) {
-            plugin.getLogger().log(Level.SEVERE, "Error al crear conexión a la base de datos", e);
-            return null;
+        Connection conn = null;
+        Statement stmt = null;
+        int retryCount = 0;
+        final int maxRetries = 3;
+        
+        while (retryCount < maxRetries) {
+            try {
+                conn = DriverManager.getConnection(connectionUrl);
+                stmt = conn.createStatement();
+                
+                // Optimizaciones específicas para SQLite - ejecutar una por una
+                stmt.execute("PRAGMA synchronous = NORMAL");  // Balance entre seguridad y rendimiento
+                stmt.execute("PRAGMA cache_size = 10000");    // Cache de 10MB aproximadamente
+                stmt.execute("PRAGMA temp_store = MEMORY");   // Tablas temporales en memoria
+                stmt.execute("PRAGMA busy_timeout = 30000");  // Timeout de 30 segundos
+                
+                return conn;
+                
+            } catch (SQLException e) {
+                retryCount++;
+                
+                // Cerrar recursos en caso de error
+                if (stmt != null) {
+                    try { stmt.close(); } catch (SQLException ignored) {}
+                }
+                if (conn != null) {
+                    try { conn.close(); } catch (SQLException ignored) {}
+                }
+                
+                if (e.getErrorCode() == 5 || e.getMessage().contains("database is locked")) {
+                    // Error SQLITE_BUSY - reintentar con backoff exponencial
+                    try {
+                        long waitTime = (long) Math.pow(2, retryCount) * 100; // 200ms, 400ms, 800ms
+                        Thread.sleep(waitTime);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                    
+                    if (retryCount < maxRetries) {
+                        plugin.getLogger().warning("Base de datos ocupada, reintentando conexión... (" + retryCount + "/" + maxRetries + ")");
+                        continue;
+                    }
+                }
+                
+                plugin.getLogger().log(Level.SEVERE, "Error al crear conexión a la base de datos (intento " + retryCount + "/" + maxRetries + ")", e);
+                
+                if (retryCount >= maxRetries) {
+                    return null;
+                }
+            } finally {
+                // Asegurar que el statement se cierre
+                if (stmt != null) {
+                    try { stmt.close(); } catch (SQLException ignored) {}
+                }
+            }
         }
+        
+        return null;
     }
     
     /**
