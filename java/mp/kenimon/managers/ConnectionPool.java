@@ -24,8 +24,8 @@ public class ConnectionPool {
     private volatile boolean shutdown = false;
     
     // Configuración optimizada para SQLite
-    private static final int DEFAULT_POOL_SIZE = 3; // Aumentado para mejor concurrencia
-    private static final int CONNECTION_TIMEOUT = 10; // Aumentado a 10 segundos para reducir timeouts
+    private static final int DEFAULT_POOL_SIZE = 4; // Aumentado para mejor concurrencia con las operaciones asíncronas
+    private static final int CONNECTION_TIMEOUT = 15; // Aumentado a 15 segundos para operaciones más complejas
     private static final int MAX_RETRY_ATTEMPTS = 2; // Máximo intentos para obtener conexión
     
     public ConnectionPool(Kenicompetitivo plugin, String connectionUrl) {

@@ -149,42 +149,48 @@ public class TopStreakHeadManager {
             return;
         }
 
-        // Guardar valores actuales antes de actualizar
-        UUID oldTopPlayer = currentTopPlayer;
-        int oldTopStreak = currentTopStreak;
+        // ARREGLADO: Hacer la obtención de datos de BD asíncrona para no bloquear el hilo principal
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            // Guardar valores actuales antes de actualizar
+            UUID oldTopPlayer = currentTopPlayer;
+            int oldTopStreak = currentTopStreak;
 
-        // IMPORTANTE: Forzar la obtención de los datos más recientes
-        forceGetTopPlayer();
+            // Obtener datos de BD de forma asíncrona
+            forceGetTopPlayer();
 
-        // Si no hay jugador top, no hacer nada
-        if (currentTopPlayer == null) {
-            return;
-        }
+            // Volver al hilo principal para el resto del procesamiento
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                // Si no hay jugador top, no hacer nada
+                if (currentTopPlayer == null) {
+                    return;
+                }
 
-        // Verificar si realmente necesitamos actualizar físicamente la cabeza
-        // Solo actualizar si: cambió el jugador, cambió la racha, o pasaron 5 minutos desde última actualización
-        boolean needsUpdate = (oldTopPlayer == null || !currentTopPlayer.equals(oldTopPlayer) ||
-                currentTopStreak != oldTopStreak ||
-                System.currentTimeMillis() - lastPhysicalUpdate > 300000);
+                // Verificar si realmente necesitamos actualizar físicamente la cabeza
+                // Solo actualizar si: cambió el jugador, cambió la racha, o pasaron 5 minutos desde última actualización
+                boolean needsUpdate = (oldTopPlayer == null || !currentTopPlayer.equals(oldTopPlayer) ||
+                        currentTopStreak != oldTopStreak ||
+                        System.currentTimeMillis() - lastPhysicalUpdate > 300000);
 
-        if (!needsUpdate) {
-            return; // No es necesario actualizar físicamente
-        }
+                if (!needsUpdate) {
+                    return; // No es necesario actualizar físicamente
+                }
 
-        // Verificar que el mundo de la ubicación esté cargado
-        if (headLocation.getWorld() == null) {
-            plugin.getLogger().warning("El mundo de la cabeza no está cargado");
-            return;
-        }
+                // Verificar que el mundo de la ubicación esté cargado
+                if (headLocation.getWorld() == null) {
+                    plugin.getLogger().warning("El mundo de la cabeza no está cargado");
+                    return;
+                }
 
-        // Ejecutar en hilo principal por seguridad
-        try {
-            // Actualizar físicamente la cabeza
-            updatePhysicalHead();
-            lastPhysicalUpdate = System.currentTimeMillis();
-        } catch (Exception e) {
-            plugin.getLogger().severe("ERROR al actualizar la cabeza: " + e.getMessage());
-        }
+                // Continuar con la actualización física en el hilo principal
+                try {
+                    // Actualizar físicamente la cabeza
+                    updatePhysicalHead();
+                    lastPhysicalUpdate = System.currentTimeMillis();
+                } catch (Exception e) {
+                    plugin.getLogger().severe("ERROR al actualizar la cabeza: " + e.getMessage());
+                }
+            });
+        });
     }
 
     /**
