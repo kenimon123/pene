@@ -43,8 +43,8 @@ public class DatabaseManager {
         File dbFile = new File(plugin.getDataFolder(), "kenicompetitivo.db");
         this.connectionUrl = "jdbc:sqlite:" + dbFile.getAbsolutePath();
 
-        // Crear pool de conexiones optimizado - leer del config (4 por defecto)
-        int poolSize = plugin.getConfig().getInt("database.pool_size", 4);
+        // Crear pool de conexiones optimizado - leer del config (2 por defecto para SQLite)
+        int poolSize = plugin.getConfig().getInt("database.pool_size", 2);
         this.connectionPool = new ConnectionPool(plugin, connectionUrl, poolSize);
         
         // Crear executor para operaciones de base de datos asíncronas
@@ -68,14 +68,15 @@ public class DatabaseManager {
             connectionPool.healthCheck();
         }, 2400L, 2400L); // Cada 2 minutos
         
-        // Programar detección de leaks cada 30 segundos
+        // Programar detección de leaks cada 10 segundos (más frecuente para resolver el problema)
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             connectionPool.detectAndFixLeaks();
-        }, 600L, 600L); // Cada 30 segundos
+        }, 200L, 200L); // Cada 10 segundos
     }
 
     /**
      * Obtiene una conexión a la base de datos del pool con manejo mejorado de errores
+     * Devuelve un PooledConnection que automáticamente retorna la conexión al pool cuando se cierra
      */
     public Connection getConnection() throws SQLException {
         long startTime = System.currentTimeMillis();
@@ -100,10 +101,17 @@ public class DatabaseManager {
                     plugin.getPerformanceMonitor().recordDbQuery(queryTime);
                 }
                 
-                return conn;
+                // Envolver la conexión para que se devuelva automáticamente al pool cuando se cierre
+                return new PooledConnection(conn, connectionPool);
                 
             } catch (SQLException e) {
                 retryCount++;
+                
+                // Si obtuvimos una conexión pero falló después, devolverla al pool
+                if (conn != null) {
+                    connectionPool.returnConnection(conn);
+                    conn = null;
+                }
                 
                 if (e.getMessage().contains("database is locked") || e.getMessage().contains("busy")) {
                     // Base de datos ocupada - reintentar con backoff exponencial
