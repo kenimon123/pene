@@ -365,5 +365,4 @@ public class ConnectionPool {
             plugin.getLogger().warning("Error durante health check del pool: " + e.getMessage());
         }
     }
-    }
 }
