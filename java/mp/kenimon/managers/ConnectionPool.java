@@ -160,8 +160,8 @@ public class ConnectionPool {
                     // Agregar estadísticas del pool para debugging
                     PoolStats stats = getStats();
                     plugin.getLogger().warning(String.format(
-                        "Timeout obteniendo conexión del pool después de %d segundos (intento %d/%d). %s", 
-                        CONNECTION_TIMEOUT, attempts, MAX_RETRY_ATTEMPTS, stats.toString()));
+                        "Timeout obteniendo conexión del pool después de %d segundos (intento %d/%d). %s. Thread: %s", 
+                        CONNECTION_TIMEOUT, attempts, MAX_RETRY_ATTEMPTS, stats.toString(), Thread.currentThread().getName()));
                     
                     // En el último intento, intentar crear nueva conexión como último recurso
                     if (attempts >= MAX_RETRY_ATTEMPTS) {
@@ -183,10 +183,11 @@ public class ConnectionPool {
                     conn = createConnection(); // Crear nueva conexión si la anterior se cerró
                 }
                 
-                // Registrar tiempo de obtención si es muy alto
+                // Registrar tiempo de obtención si es muy alto o para debugging durante startup
                 long elapsed = System.currentTimeMillis() - startTime;
-                if (elapsed > 1000) {
-                    plugin.getLogger().info(String.format("Conexión obtenida después de %dms (intento %d)", elapsed, attempts + 1));
+                if (elapsed > 1000 || plugin.getConfig().getBoolean("database.debug", false)) {
+                    plugin.getLogger().info(String.format("Conexión DB obtenida después de %dms (retries: %d). Thread: %s", 
+                        elapsed, attempts, Thread.currentThread().getName()));
                 }
                 
                 return conn;
