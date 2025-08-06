@@ -66,8 +66,16 @@ public class Kenicompetitivo extends JavaPlugin {
         // Inicializamos el sistema de cosméticos
         cosmeticManager = new CosmeticManager(this);
 
-        // Inicializar shop manager
-        shopManager = new ShopManager(this);
+        // Inicializar shop manager de forma asíncrona para evitar bloqueos de conexión
+        getServer().getScheduler().runTaskAsynchronously(this, () -> {
+            try {
+                shopManager = new ShopManager(this);
+                getLogger().info("ShopManager inicializado correctamente de forma asíncrona");
+            } catch (Exception e) {
+                getLogger().severe("Error al inicializar ShopManager: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
 
         // Inicializamos el sistema de rankings/leaderboards
         rankingManager = new RankingManager(this);
@@ -195,6 +203,16 @@ public class Kenicompetitivo extends JavaPlugin {
     }
 
     public ShopManager getShopManager() {
+        // Verificar si el ShopManager está inicializado (puede tardar por carga asíncrona)
+        if (shopManager == null) {
+            getLogger().warning("ShopManager aún no está inicializado - inicializando ahora de forma síncrona como fallback");
+            try {
+                shopManager = new ShopManager(this);
+            } catch (Exception e) {
+                getLogger().severe("Error crítico: No se pudo inicializar ShopManager: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
         return shopManager;
     }
 

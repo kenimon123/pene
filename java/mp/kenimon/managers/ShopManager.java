@@ -57,14 +57,20 @@ public class ShopManager {
         this.customItems = new HashMap<>();
         this.lastUpdateTime = System.currentTimeMillis();
 
+        plugin.getLogger().info("Iniciando inicialización de ShopManager...");
+
         try {
             // Crear tabla para historial de compras si está habilitado
             if (plugin.getConfigManager().getConfig().getBoolean("settings.save_purchases", true)) {
+                plugin.getLogger().info("Configurando base de datos de la tienda...");
                 setupDatabase();
+                plugin.getLogger().info("Cargando historial de compras...");
                 loadPurchaseHistory();
             }
 
+            plugin.getLogger().info("Cargando configuración de la tienda...");
             loadConfiguration();
+            plugin.getLogger().info("Programando actualizaciones de la tienda...");
             scheduleShopUpdates();
             plugin.getLogger().info("ShopManager inicializado correctamente");
         } catch (Exception e) {
@@ -84,7 +90,9 @@ public class ShopManager {
      * Configura la base de datos para el historial de compras
      */
     private void setupDatabase() {
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+        Connection conn = null;
+        try {
+            conn = plugin.getDatabaseManager().getConnection();
             String createTableSQL = "CREATE TABLE IF NOT EXISTS shop_purchases ("
                     + "player_uuid VARCHAR(36) NOT NULL, "
                     + "item_id VARCHAR(64) NOT NULL, "
@@ -96,6 +104,11 @@ public class ShopManager {
         } catch (SQLException e) {
             plugin.getLogger().severe("Error al configurar la tabla de compras en la base de datos:");
             e.printStackTrace();
+        } finally {
+            // CRÍTICO: Siempre devolver la conexión al pool
+            if (conn != null) {
+                plugin.getDatabaseManager().returnConnection(conn);
+            }
         }
     }
 
@@ -103,24 +116,33 @@ public class ShopManager {
      * Carga el historial de compras desde la base de datos
      */
     private void loadPurchaseHistory() {
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+        Connection conn = null;
+        try {
+            conn = plugin.getDatabaseManager().getConnection();
             String query = "SELECT player_uuid, item_id, purchase_time FROM shop_purchases";
-            ResultSet rs = conn.createStatement().executeQuery(query);
+            try (PreparedStatement stmt = conn.prepareStatement(query);
+                 ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) {
-                UUID playerId = UUID.fromString(rs.getString("player_uuid"));
-                String itemId = rs.getString("item_id");
-                long purchaseTime = rs.getTimestamp("purchase_time").getTime();
+                while (rs.next()) {
+                    UUID playerId = UUID.fromString(rs.getString("player_uuid"));
+                    String itemId = rs.getString("item_id");
+                    long purchaseTime = rs.getTimestamp("purchase_time").getTime();
 
-                // Guardar en el mapa en memoria
-                purchaseHistory.computeIfAbsent(playerId, k -> new HashMap<>())
-                        .put(itemId, purchaseTime);
+                    // Guardar en el mapa en memoria
+                    purchaseHistory.computeIfAbsent(playerId, k -> new HashMap<>())
+                            .put(itemId, purchaseTime);
+                }
+
+                plugin.getLogger().info("Historial de compras cargado desde la base de datos.");
             }
-
-            plugin.getLogger().info("Historial de compras cargado desde la base de datos.");
         } catch (SQLException e) {
             plugin.getLogger().severe("Error al cargar el historial de compras desde la base de datos:");
             e.printStackTrace();
+        } finally {
+            // CRÍTICO: Siempre devolver la conexión al pool
+            if (conn != null) {
+                plugin.getDatabaseManager().returnConnection(conn);
+            }
         }
     }
 
@@ -130,7 +152,9 @@ public class ShopManager {
 
         // Si no hay ítem gratuito, no hay nada que cargar para el gratuito
         if (freeItemId != null && !freeItemId.isEmpty()) {
-            try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+            Connection conn = null;
+            try {
+                conn = plugin.getDatabaseManager().getConnection();
                 // Consultar todos los jugadores que reclamaron el ítem gratuito hoy
                 String sql = "SELECT player_uuid FROM shop_purchases WHERE item_id = ? AND purchase_time > ?";
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -155,16 +179,23 @@ public class ShopManager {
             } catch (Exception e) {
                 plugin.getLogger().severe("Error al cargar ítems gratuitos reclamados: " + e.getMessage());
                 e.printStackTrace();
+            } finally {
+                // CRÍTICO: Siempre devolver la conexión al pool
+                if (conn != null) {
+                    plugin.getDatabaseManager().returnConnection(conn);
+                }
             }
         }
 
         // También cargar todas las compras recientes para asegurar que se muestren correctamente
         recentPurchases.clear();
 
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+        Connection conn2 = null;
+        try {
+            conn2 = plugin.getDatabaseManager().getConnection();
             // Consultar todas las compras recientes (últimas 24 horas)
             String sql = "SELECT player_uuid, item_id, purchase_time FROM shop_purchases WHERE purchase_time > ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement stmt = conn2.prepareStatement(sql)) {
                 // Calcular tiempo hace 24 horas
                 Timestamp yesterday = new Timestamp(System.currentTimeMillis() - (24 * 60 * 60 * 1000));
                 stmt.setTimestamp(1, yesterday);
@@ -188,6 +219,11 @@ public class ShopManager {
         } catch (Exception e) {
             plugin.getLogger().severe("Error al cargar compras recientes: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            // CRÍTICO: Siempre devolver la conexión al pool
+            if (conn2 != null) {
+                plugin.getDatabaseManager().returnConnection(conn2);
+            }
         }
 
         plugin.getLogger().info("Cargados " + claimedFreeItem.size() + " jugadores que ya reclamaron el ítem gratuito");
@@ -230,8 +266,8 @@ public class ShopManager {
         // Crear el inventario de la tienda
         createShopInventory();
 
-        // Cargar ítems reclamados
-        loadClaimedFreeItems();
+        // Cargar ítems reclamados de forma asíncrona para no bloquear el startup
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, this::loadClaimedFreeItems);
 
         plugin.getLogger().info("Configuración de tienda cargada correctamente");
     }
@@ -892,7 +928,9 @@ public class ShopManager {
 
         // Si no está en el caché, consultar la base de datos
         boolean hasPurchased = false;
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+        Connection conn = null;
+        try {
+            conn = plugin.getDatabaseManager().getConnection();
             String sql = "SELECT COUNT(*) FROM shop_purchases WHERE player_uuid = ? AND item_id = ? AND purchase_time > ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, playerUUID.toString());
@@ -909,20 +947,18 @@ public class ShopManager {
 
                         // Si ha comprado, añadirlo al caché
                         if (hasPurchased) {
-                            // Obtener el tiempo de compra
-                            PreparedStatement timeStmt = conn.prepareStatement(
-                                    "SELECT purchase_time FROM shop_purchases WHERE player_uuid = ? AND item_id = ? ORDER BY purchase_time DESC LIMIT 1");
-                            timeStmt.setString(1, playerUUID.toString());
-                            timeStmt.setString(2, itemId);
-                            ResultSet timeRs = timeStmt.executeQuery();
-
-                            if (timeRs.next()) {
-                                Timestamp purchaseTime = timeRs.getTimestamp("purchase_time");
-                                recentPurchases.put(key, purchaseTime.getTime());
+                            // Obtener el tiempo de compra usando la misma conexión
+                            try (PreparedStatement timeStmt = conn.prepareStatement(
+                                    "SELECT purchase_time FROM shop_purchases WHERE player_uuid = ? AND item_id = ? ORDER BY purchase_time DESC LIMIT 1")) {
+                                timeStmt.setString(1, playerUUID.toString());
+                                timeStmt.setString(2, itemId);
+                                try (ResultSet timeRs = timeStmt.executeQuery()) {
+                                    if (timeRs.next()) {
+                                        Timestamp purchaseTime = timeRs.getTimestamp("purchase_time");
+                                        recentPurchases.put(key, purchaseTime.getTime());
+                                    }
+                                }
                             }
-
-                            timeRs.close();
-                            timeStmt.close();
                         }
                     }
                 }
@@ -930,6 +966,11 @@ public class ShopManager {
         } catch (Exception e) {
             plugin.getLogger().severe("Error al verificar compra reciente: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            // CRÍTICO: Siempre devolver la conexión al pool
+            if (conn != null) {
+                plugin.getDatabaseManager().returnConnection(conn);
+            }
         }
 
         return hasPurchased;
@@ -951,7 +992,9 @@ public class ShopManager {
             purchaseTime = recentPurchases.get(key);
         } else {
             // Si no está en caché, consultar la base de datos
-            try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+            Connection conn = null;
+            try {
+                conn = plugin.getDatabaseManager().getConnection();
                 String sql = "SELECT MAX(purchase_time) AS latest FROM shop_purchases WHERE player_uuid = ? AND item_id = ?";
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                     stmt.setString(1, playerId.toString());
@@ -969,6 +1012,11 @@ public class ShopManager {
             } catch (Exception e) {
                 plugin.getLogger().severe("Error al obtener tiempo de compra: " + e.getMessage());
                 return "Error";
+            } finally {
+                // CRÍTICO: Siempre devolver la conexión al pool
+                if (conn != null) {
+                    plugin.getDatabaseManager().returnConnection(conn);
+                }
             }
         }
 
@@ -1461,7 +1509,9 @@ public class ShopManager {
         long currentTime = System.currentTimeMillis();
 
         // Registrar en la base de datos
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+        Connection conn = null;
+        try {
+            conn = plugin.getDatabaseManager().getConnection();
             String sql = "INSERT INTO shop_purchases (player_uuid, item_id, purchase_time) VALUES (?, ?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, playerUUID.toString());
@@ -1472,6 +1522,11 @@ public class ShopManager {
         } catch (Exception e) {
             plugin.getLogger().severe("Error al registrar compra: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            // CRÍTICO: Siempre devolver la conexión al pool
+            if (conn != null) {
+                plugin.getDatabaseManager().returnConnection(conn);
+            }
         }
 
         // Actualizar el caché de compras recientes
@@ -1624,7 +1679,9 @@ public class ShopManager {
             return false;
         }
 
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+        Connection conn = null;
+        try {
+            conn = plugin.getDatabaseManager().getConnection();
             String sql = "DELETE FROM shop_purchases WHERE player_uuid = ? AND item_id = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, playerUUID.toString());
@@ -1636,6 +1693,11 @@ public class ShopManager {
             plugin.getLogger().severe("Error al reiniciar cooldown: " + e.getMessage());
             e.printStackTrace();
             return false;
+        } finally {
+            // CRÍTICO: Siempre devolver la conexión al pool
+            if (conn != null) {
+                plugin.getDatabaseManager().returnConnection(conn);
+            }
         }
     }
 
@@ -1647,7 +1709,9 @@ public class ShopManager {
             return;
         }
 
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+        Connection conn = null;
+        try {
+            conn = plugin.getDatabaseManager().getConnection();
             String sql = "DELETE FROM shop_purchases WHERE player_uuid = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, playerUUID.toString());
@@ -1656,6 +1720,11 @@ public class ShopManager {
         } catch (Exception e) {
             plugin.getLogger().severe("Error al reiniciar todos los cooldowns: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            // CRÍTICO: Siempre devolver la conexión al pool
+            if (conn != null) {
+                plugin.getDatabaseManager().returnConnection(conn);
+            }
         }
     }
 
