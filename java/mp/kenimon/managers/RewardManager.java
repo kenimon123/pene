@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 public class RewardManager {
@@ -49,9 +50,9 @@ public class RewardManager {
      * Carga las recompensas reclamadas desde la base de datos.
      */
     private void loadClaimedRewards() {
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
-            String query = "SELECT player_uuid, reward_id FROM claimed_rewards";
-            ResultSet rs = conn.createStatement().executeQuery(query);
+        try (Connection conn = plugin.getDatabaseManager().getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT player_uuid, reward_id FROM claimed_rewards")) {
 
             while (rs.next()) {
                 UUID playerId = UUID.fromString(rs.getString("player_uuid"));
@@ -90,9 +91,9 @@ public class RewardManager {
             return false;
         }
 
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
-            String insertSQL = "INSERT INTO claimed_rewards (player_uuid, reward_id) VALUES (?, ?)";
-            PreparedStatement stmt = conn.prepareStatement(insertSQL);
+        try (Connection conn = plugin.getDatabaseManager().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO claimed_rewards (player_uuid, reward_id) VALUES (?, ?)")) {
+            
             stmt.setString(1, playerId.toString());
             stmt.setString(2, rewardId);
             stmt.executeUpdate();
@@ -115,9 +116,9 @@ public class RewardManager {
      * @return true si se eliminó correctamente
      */
     public boolean unclaimReward(UUID playerId, String rewardId) {
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
-            String deleteSQL = "DELETE FROM claimed_rewards WHERE player_uuid = ? AND reward_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(deleteSQL);
+        try (Connection conn = plugin.getDatabaseManager().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM claimed_rewards WHERE player_uuid = ? AND reward_id = ?")) {
+            
             stmt.setString(1, playerId.toString());
             stmt.setString(2, rewardId);
             int affected = stmt.executeUpdate();
@@ -186,9 +187,11 @@ public class RewardManager {
                 return;
         }
 
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+        try (Connection conn = plugin.getDatabaseManager().getConnection();
+             Statement stmt = conn.createStatement()) {
+            
             String deleteSQL = "DELETE FROM claimed_rewards WHERE " + timeCondition;
-            int deleted = conn.createStatement().executeUpdate(deleteSQL);
+            int deleted = stmt.executeUpdate(deleteSQL);
 
             // Recargar desde la base de datos para actualizar la caché
             claimedRewards.clear();
@@ -293,9 +296,9 @@ public class RewardManager {
         }
 
         // Registrar en la base de datos
-        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
-            String insertSQL = "INSERT INTO claimed_rewards (player_uuid, reward_id) VALUES (?, ?)";
-            PreparedStatement stmt = conn.prepareStatement(insertSQL);
+        try (Connection conn = plugin.getDatabaseManager().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO claimed_rewards (player_uuid, reward_id) VALUES (?, ?)")) {
+            
             stmt.setString(1, uniqueId.toString());
             stmt.setString(2, rewardId);
             stmt.executeUpdate();
