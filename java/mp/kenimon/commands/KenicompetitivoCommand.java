@@ -290,81 +290,98 @@ public class KenicompetitivoCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        int currentStreak = plugin.getCacheManager().getCachedKillStreak(targetUUID);
-        final int newStreak;
+        // Mover todas las operaciones de base de datos a hilo asíncrono para evitar bloqueo del servidor
+        final UUID finalTargetUUID = targetUUID;
+        final Player finalTarget = target;
+        final String finalPlayerName = playerName;
+        
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                int currentStreak = plugin.getCacheManager().getCachedKillStreak(finalTargetUUID);
+                final int newStreak;
 
-        if (action.equals("set")) {
-            // Establecer racha directamente
-            if (amount < 0) {
-                sender.sendMessage(ChatColor.RED + "La cantidad debe ser un número positivo.");
-                return;
-            }
-            newStreak = amount;
+                if (action.equals("set")) {
+                    // Establecer racha directamente
+                    if (amount < 0) {
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            sender.sendMessage(ChatColor.RED + "La cantidad debe ser un número positivo.");
+                        });
+                        return;
+                    }
+                    newStreak = amount;
 
-            // Actualizar en la base de datos y en caché
-            plugin.getDatabaseManager().setKillStreak(targetUUID, newStreak);
-            plugin.getCacheManager().setCachedKillStreak(targetUUID, newStreak);
+                    // Actualizar en la base de datos y en caché
+                    plugin.getDatabaseManager().setKillStreak(finalTargetUUID, newStreak);
+                    plugin.getCacheManager().setCachedKillStreak(finalTargetUUID, newStreak);
 
-            // Si es mayor que la racha máxima, actualizar también la racha máxima
-            final int maxStreak = plugin.getCacheManager().getCachedMaxKillStreak(targetUUID);
-            if (newStreak > maxStreak) {
-                final UUID finalTargetUUID = targetUUID; // Variable para lambda
-                plugin.getDatabaseManager().updateMaxKillStreak(finalTargetUUID, newStreak, success -> {
-                    if (success) {
-                        plugin.getCacheManager().setCachedMaxKillStreak(finalTargetUUID, newStreak);
+                    // Si es mayor que la racha máxima, actualizar también la racha máxima
+                    final int maxStreak = plugin.getCacheManager().getCachedMaxKillStreak(finalTargetUUID);
+                    if (newStreak > maxStreak) {
+                        plugin.getDatabaseManager().updateMaxKillStreak(finalTargetUUID, newStreak, success -> {
+                            if (success) {
+                                plugin.getCacheManager().setCachedMaxKillStreak(finalTargetUUID, newStreak);
+                            }
+                        });
+                    }
+
+                } else { // action == "add"
+                    // Añadir a la racha actual
+                    int tempStreak = currentStreak + amount;
+                    if (tempStreak < 0) {
+                        // Permitir valores negativos pero no menores a 0
+                        tempStreak = 0;
+                    }
+                    newStreak = tempStreak;
+
+                    // Actualizar en la base de datos y en caché
+                    plugin.getDatabaseManager().setKillStreak(finalTargetUUID, newStreak);
+                    plugin.getCacheManager().setCachedKillStreak(finalTargetUUID, newStreak);
+
+                    // Si es mayor que la racha máxima, actualizar también la racha máxima
+                    final int maxStreak = plugin.getCacheManager().getCachedMaxKillStreak(finalTargetUUID);
+                    if (newStreak > maxStreak) {
+                        plugin.getDatabaseManager().updateMaxKillStreak(finalTargetUUID, newStreak, success -> {
+                            if (success) {
+                                plugin.getCacheManager().setCachedMaxKillStreak(finalTargetUUID, newStreak);
+                            }
+                        });
+                    }
+                }
+
+                // Actualizar información de jugador top si corresponde
+                if (finalTarget != null && finalTarget.isOnline()) {
+                    plugin.getTopStreakHeadManager().checkStreakUpdate(finalTargetUUID, newStreak);
+                    plugin.getCosmeticManager().checkStreakUnlocks(finalTarget, newStreak);
+                }
+
+                // Volver al hilo principal para enviar mensajes
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    // Mensaje de confirmación
+                    String playerNameToShow = finalTarget != null ? finalTarget.getName() : finalPlayerName;
+                    String actionWord = amount >= 0 ? "aumentada" : "reducida";
+
+                    sender.sendMessage(plugin.getConfigManager().getFormattedMessage(
+                                    "commands.streak_set", "&aRacha de kills de {player} establecida en {amount}")
+                            .replace("{player}", playerNameToShow)
+                            .replace("{amount}", String.valueOf(newStreak)));
+
+                    // Notificar al jugador si está online
+                    if (finalTarget != null && finalTarget.isOnline()) {
+                        String message = plugin.getConfigManager().getFormattedMessage(
+                                        "commands.streak_received", "&aTu racha de kills ha {action} en {amount}")
+                                .replace("{action}", actionWord)
+                                .replace("{amount}", String.valueOf(Math.abs(amount)));
+                        finalTarget.sendMessage(message);
                     }
                 });
-            }
 
-        } else { // action == "add"
-            // Añadir a la racha actual
-            newStreak = currentStreak + amount;
-            if (newStreak < 0) {
-            }
-
-            // Actualizar en la base de datos y en caché
-            plugin.getDatabaseManager().setKillStreak(targetUUID, newStreak);
-            plugin.getCacheManager().setCachedKillStreak(targetUUID, newStreak);
-
-            // Si es mayor que la racha máxima, actualizar también la racha máxima
-            final int maxStreak = plugin.getCacheManager().getCachedMaxKillStreak(targetUUID);
-            if (newStreak > maxStreak) {
-                final UUID finalTargetUUID = targetUUID; // Variable para lambda
-                plugin.getDatabaseManager().updateMaxKillStreak(finalTargetUUID, newStreak, success -> {
-                    if (success) {
-                        plugin.getCacheManager().setCachedMaxKillStreak(finalTargetUUID, newStreak);
-                    }
+            } catch (Exception e) {
+                plugin.getLogger().warning("Error procesando comando racha: " + e.getMessage());
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    sender.sendMessage(ChatColor.RED + "Error procesando el comando. Inténtalo de nuevo.");
                 });
             }
-        }
-
-        // Actualizar información de jugador top si corresponde (asíncrono)
-        if (target != null && target.isOnline()) {
-            plugin.getTopStreakHeadManager().checkStreakUpdate(targetUUID, newStreak);
-            
-            // Hacer la verificación de cosméticos asíncrona también
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                plugin.getCosmeticManager().checkStreakUnlocks(target, newStreak);
-            });
-        }
-
-        // Mensaje de confirmación
-        String playerNameToShow = target != null ? target.getName() : playerName;
-        String actionWord = amount >= 0 ? "aumentada" : "reducida";
-
-        sender.sendMessage(plugin.getConfigManager().getFormattedMessage(
-                        "commands.streak_set", "&aRacha de kills de {player} establecida en {amount}")
-                .replace("{player}", playerNameToShow)
-                .replace("{amount}", String.valueOf(newStreak)));
-
-        // Notificar al jugador si está online
-        if (target != null && target.isOnline()) {
-            String message = plugin.getConfigManager().getFormattedMessage(
-                            "commands.streak_received", "&aTu racha de kills ha {action} en {amount}")
-                    .replace("{action}", actionWord)
-                    .replace("{amount}", String.valueOf(Math.abs(amount)));
-            target.sendMessage(message);
-        }
+        });
 
         // CRÍTICO: Mover actualización de rankings a asíncrono para no bloquear el servidor
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
