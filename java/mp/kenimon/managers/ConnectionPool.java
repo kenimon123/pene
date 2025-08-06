@@ -24,7 +24,7 @@ public class ConnectionPool {
     private volatile boolean shutdown = false;
     
     // Configuración optimizada para SQLite
-    private static final int DEFAULT_POOL_SIZE = 4; // Aumentado para mejor concurrencia con las operaciones asíncronas
+    private static final int DEFAULT_POOL_SIZE = 2; // Reducido a 2 para SQLite - suficiente para operaciones concurrentes
     private static final int CONNECTION_TIMEOUT = 15; // Aumentado a 15 segundos para operaciones más complejas
     private static final int MAX_RETRY_ATTEMPTS = 2; // Máximo intentos para obtener conexión
     
@@ -288,32 +288,70 @@ public class ConnectionPool {
     }
     
     /**
-     * Detecta posibles connection leaks y intenta recuperarlos
+     * Detecta posibles connection leaks y intenta recuperarlos de forma más agresiva
      */
     public void detectAndFixLeaks() {
         if (shutdown) return;
         
         PoolStats stats = getStats();
         
-        // Si todas las conexiones están activas por más de 1 minuto, puede haber leaks
-        if (stats.getAvailableConnections() == 0 && stats.getActiveConnections() >= maxConnections) {
-            plugin.getLogger().warning("Posible connection leak detectado: " + stats.toString() + " - Iniciando limpieza");
+        // Si todas las conexiones están activas, puede haber leaks
+        if (stats.getAvailableConnections() == 0) {
+            plugin.getLogger().warning("Pool agotado detectado: " + stats.toString() + " - Iniciando recuperación agresiva");
             
-            // Forzar creación de nuevas conexiones para reemplazar las posiblemente leakeadas
+            // Crear nuevas conexiones para reemplazar las posiblemente leakeadas
             int recovered = 0;
-            for (int i = 0; i < maxConnections && recovered < 2; i++) {
+            int maxRecovery = Math.min(maxConnections / 2, 3); // Recuperar hasta la mitad del pool o 3 conexiones
+            
+            for (int i = 0; i < maxRecovery; i++) {
                 Connection newConn = createConnection();
                 if (newConn != null && pool.offer(newConn)) {
                     recovered++;
+                } else if (newConn != null) {
+                    try {
+                        newConn.close();
+                    } catch (SQLException ignored) {}
                 }
             }
             
             if (recovered > 0) {
-                plugin.getLogger().info("Recuperadas " + recovered + " conexiones del pool");
+                plugin.getLogger().info("Recuperadas " + recovered + " conexiones del pool. Stats: " + getStats().toString());
             } else {
                 plugin.getLogger().severe("No se pudieron recuperar conexiones - problema crítico de base de datos");
+                // Como último recurso, intentar limpiar el pool completo
+                forcePoolReset();
             }
         }
+    }
+    
+    /**
+     * Reseteo forzado del pool como último recurso
+     */
+    private void forcePoolReset() {
+        plugin.getLogger().warning("Ejecutando reseteo forzado del pool de conexiones...");
+        
+        // Vaciar el pool actual
+        Connection conn;
+        int removed = 0;
+        while ((conn = pool.poll()) != null) {
+            try {
+                conn.close();
+                removed++;
+            } catch (SQLException ignored) {}
+        }
+        
+        plugin.getLogger().info("Removidas " + removed + " conexiones del pool");
+        
+        // Recrear conexiones nuevas
+        int created = 0;
+        for (int i = 0; i < maxConnections && created < 2; i++) {
+            Connection newConn = createConnection();
+            if (newConn != null && pool.offer(newConn)) {
+                created++;
+            }
+        }
+        
+        plugin.getLogger().info("Pool reseteo completado. Nuevas conexiones creadas: " + created + ". Stats: " + getStats().toString());
     }
     
     /**
