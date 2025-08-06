@@ -960,7 +960,6 @@ public class CosmeticManager {
             }
         });
     }
-    }
 
     /**
      * Registra efectos de sonido adicionales
