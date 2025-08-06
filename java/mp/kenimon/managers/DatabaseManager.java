@@ -43,8 +43,8 @@ public class DatabaseManager {
         File dbFile = new File(plugin.getDataFolder(), "kenicompetitivo.db");
         this.connectionUrl = "jdbc:sqlite:" + dbFile.getAbsolutePath();
 
-        // Crear pool de conexiones optimizado - usar 2 conexiones por defecto para SQLite (reducido)
-        int poolSize = plugin.getConfig().getInt("database.pool_size", 2);
+        // Crear pool de conexiones optimizado - leer del config (4 por defecto)
+        int poolSize = plugin.getConfig().getInt("database.pool_size", 4);
         this.connectionPool = new ConnectionPool(plugin, connectionUrl, poolSize);
         
         // Crear executor para operaciones de base de datos asíncronas
@@ -812,14 +812,14 @@ public class DatabaseManager {
      * Añade rachas a un jugador (para comandos administrativos)
      */
     public void addKillStreak(UUID uuid, int amount) {
-        try (Connection conn = getConnection()) {
+        // ARREGLADO: No mantener conexión abierta durante múltiples llamadas
+        // Cada método manejará su propia conexión para evitar leaks
+        try {
             registerPlayer(uuid);
-
             int currentStreak = getKillStreak(uuid);
             int newStreak = currentStreak + amount;
             setKillStreak(uuid, newStreak);
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
             plugin.getLogger().warning("Error al añadir rachas: " + e.getMessage());
         }
     }
@@ -879,32 +879,36 @@ public class DatabaseManager {
      */
     public void updateKillStreak(UUID uuid, int streak, Consumer<Boolean> callback) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try (Connection conn = getConnection()) {
+            try {
+                // ARREGLADO: No mantener conexión durante registerPlayer() y getMaxKillStreak()
                 registerPlayer(uuid);
-
                 int maxStreak = getMaxKillStreak(uuid);
-                if (streak > maxStreak) {
-                    // Actualizar también la racha máxima
-                    try (PreparedStatement ps = conn.prepareStatement(
-                            "UPDATE players SET kill_streak = ?, max_kill_streak = ? WHERE uuid = ?")) {
-                        ps.setInt(1, streak);
-                        ps.setInt(2, streak);
-                        ps.setString(3, uuid.toString());
-                        int updated = ps.executeUpdate();
+                
+                // Ahora usar una sola conexión para la actualización final
+                try (Connection conn = getConnection()) {
+                    if (streak > maxStreak) {
+                        // Actualizar también la racha máxima
+                        try (PreparedStatement ps = conn.prepareStatement(
+                                "UPDATE players SET kill_streak = ?, max_kill_streak = ? WHERE uuid = ?")) {
+                            ps.setInt(1, streak);
+                            ps.setInt(2, streak);
+                            ps.setString(3, uuid.toString());
+                            int updated = ps.executeUpdate();
 
-                        // Ejecutar callback en el hilo principal
-                        Bukkit.getScheduler().runTask(plugin, () -> callback.accept(updated > 0));
-                    }
-                } else {
-                    // Solo actualizar racha actual
-                    try (PreparedStatement ps = conn.prepareStatement(
-                            "UPDATE players SET kill_streak = ? WHERE uuid = ?")) {
-                        ps.setInt(1, streak);
-                        ps.setString(2, uuid.toString());
-                        int updated = ps.executeUpdate();
+                            // Ejecutar callback en el hilo principal
+                            Bukkit.getScheduler().runTask(plugin, () -> callback.accept(updated > 0));
+                        }
+                    } else {
+                        // Solo actualizar racha actual
+                        try (PreparedStatement ps = conn.prepareStatement(
+                                "UPDATE players SET kill_streak = ? WHERE uuid = ?")) {
+                            ps.setInt(1, streak);
+                            ps.setString(2, uuid.toString());
+                            int updated = ps.executeUpdate();
 
-                        // Ejecutar callback en el hilo principal
-                        Bukkit.getScheduler().runTask(plugin, () -> callback.accept(updated > 0));
+                            // Ejecutar callback en el hilo principal
+                            Bukkit.getScheduler().runTask(plugin, () -> callback.accept(updated > 0));
+                        }
                     }
                 }
             } catch (SQLException e) {
